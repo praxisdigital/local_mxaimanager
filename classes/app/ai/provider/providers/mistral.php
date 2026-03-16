@@ -49,50 +49,41 @@ class mistral extends provider implements interfaces\chat_completion, interfaces
         ]);
     }
 
+    private const CHAT_MODELS = [
+        'mistral-large-3-25-12', 'mistral-medium-3-1-25-08', 'mistral-small-3-2-25-06',
+        'ministral-3-14b-25-12', 'ministral-3-8b-25-12', 'ministral-3-3b-25-12',
+        'magistral-medium-1-2-25-09', 'magistral-small-1-2-25-09',
+        'devstral-2-25-12', 'codestral-25-08',
+    ];
+
+    private const EMBEDDING_MODELS = [
+        'mistral-embed-23-12', 'codestral-embed-25-05',
+    ];
+
+    private const TRANSCRIPTION_MODELS = [
+        'voxtral-mini-transcribe-26-02', 'voxtral-mini-transcribe-25-07',
+        'voxtral-mini-25-07', 'voxtral-small-25-07',
+    ];
+
     private static function add_chat_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
-        $mform->addElement(
-            'text',
-            "{$element_name_prefix}chat_model",
-            get_string('default_chat_model', 'local_mxaimanager'),
-            [
-                'action' => interfaces\chat_completion::class
-            ]
-        );
-        $mform->setType("{$element_name_prefix}chat_model", PARAM_TEXT);
-        $mform->addHelpButton("{$element_name_prefix}chat_model", 'mistral_chat_model', 'local_mxaimanager');
+        self::add_model_field($mform, $element_name_prefix, 'chat_model',
+            'default_chat_model', 'mistral_chat_model',
+            interfaces\chat_completion::class, self::CHAT_MODELS);
     }
 
     private static function add_embedding_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
-        $mform->addElement(
-            'text',
-            "{$element_name_prefix}embedding_model",
-            get_string('default_embedding_model', 'local_mxaimanager'),
-            [
-                'action' => interfaces\create_embedding::class
-            ]
-        );
-        $mform->setType("{$element_name_prefix}embedding_model", PARAM_TEXT);
-        $mform->addHelpButton("{$element_name_prefix}embedding_model", 'mistral_embedding_model', 'local_mxaimanager');
+        self::add_model_field($mform, $element_name_prefix, 'embedding_model',
+            'default_embedding_model', 'mistral_embedding_model',
+            interfaces\create_embedding::class, self::EMBEDDING_MODELS);
     }
 
     private static function add_transcription_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
-        $mform->addElement(
-            'text',
-            "{$element_name_prefix}transcription_model",
-            get_string('default_transcription_model', 'local_mxaimanager'),
-            [
-                'action' => interfaces\create_transcription::class
-            ]
-        );
-        $mform->setType("{$element_name_prefix}transcription_model", PARAM_TEXT);
-        $mform->addHelpButton(
-            "{$element_name_prefix}transcription_model",
-            'mistral_transcription_model',
-            'local_mxaimanager'
-        );
+        self::add_model_field($mform, $element_name_prefix, 'transcription_model',
+            'default_transcription_model', 'mistral_transcription_model',
+            interfaces\create_transcription::class, self::TRANSCRIPTION_MODELS);
     }
 
     public static function moodleform_definition(\MoodleQuickForm $mform, string $element_name_prefix): void

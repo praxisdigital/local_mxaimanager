@@ -52,64 +52,53 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
         ]);
     }
 
+    private const CHAT_MODELS = [
+        'gpt-5.4', 'gpt-5.4-pro', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano',
+        'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano',
+        'gpt-4o', 'gpt-4o-mini',
+        'o3', 'o3-mini', 'o3-pro',
+    ];
+
+    private const EMBEDDING_MODELS = [
+        'text-embedding-3-large', 'text-embedding-3-small', 'text-embedding-ada-002',
+    ];
+
+    private const IMAGE_MODELS = [
+        'gpt-image-1.5', 'gpt-image-1', 'gpt-image-1-mini',
+        'dall-e-3', 'dall-e-2',
+    ];
+
+    private const TRANSCRIPTION_MODELS = [
+        'gpt-4o-transcribe', 'gpt-4o-mini-transcribe',
+        'gpt-4o-transcribe-diarize', 'whisper-1',
+    ];
+
     private static function add_chat_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
-        $mform->addElement(
-            'text',
-            "{$element_name_prefix}chat_model",
-            get_string('default_chat_model', 'local_mxaimanager'),
-            [
-                'action' => interfaces\chat_completion::class
-            ]
-        );
-        $mform->setType("{$element_name_prefix}chat_model", PARAM_TEXT);
-        $mform->addHelpButton("{$element_name_prefix}chat_model", 'openai_chat_model', 'local_mxaimanager');
+        self::add_model_field($mform, $element_name_prefix, 'chat_model',
+            'default_chat_model', 'openai_chat_model',
+            interfaces\chat_completion::class, self::CHAT_MODELS);
     }
 
     private static function add_embedding_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
-        $mform->addElement(
-            'text',
-            "{$element_name_prefix}embedding_model",
-            get_string('default_embedding_model', 'local_mxaimanager'),
-            [
-                'action' => interfaces\create_embedding::class
-            ]
-        );
-        $mform->setType("{$element_name_prefix}embedding_model", PARAM_TEXT);
-        $mform->addHelpButton("{$element_name_prefix}embedding_model", 'openai_embedding_model', 'local_mxaimanager');
+        self::add_model_field($mform, $element_name_prefix, 'embedding_model',
+            'default_embedding_model', 'openai_embedding_model',
+            interfaces\create_embedding::class, self::EMBEDDING_MODELS);
     }
 
     private static function add_image_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
-        $mform->addElement(
-            'text',
-            "{$element_name_prefix}image_model",
-            get_string('default_image_model', 'local_mxaimanager'),
-            [
-                'action' => interfaces\create_image::class
-            ]
-        );
-        $mform->setType("{$element_name_prefix}image_model", PARAM_TEXT);
-        $mform->addHelpButton("{$element_name_prefix}image_model", 'openai_image_model', 'local_mxaimanager');
+        self::add_model_field($mform, $element_name_prefix, 'image_model',
+            'default_image_model', 'openai_image_model',
+            interfaces\create_image::class, self::IMAGE_MODELS);
     }
 
     private static function add_transcription_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
-        $mform->addElement(
-            'text',
-            "{$element_name_prefix}transcription_model",
-            get_string('default_transcription_model', 'local_mxaimanager'),
-            [
-                'action' => interfaces\create_transcription::class
-            ]
-        );
-        $mform->setType("{$element_name_prefix}transcription_model", PARAM_TEXT);
-        $mform->addHelpButton(
-            "{$element_name_prefix}transcription_model",
-            'openai_transcription_model',
-            'local_mxaimanager'
-        );
+        self::add_model_field($mform, $element_name_prefix, 'transcription_model',
+            'default_transcription_model', 'openai_transcription_model',
+            interfaces\create_transcription::class, self::TRANSCRIPTION_MODELS);
     }
 
     public static function moodleform_definition(\MoodleQuickForm $mform, string $element_name_prefix): void
