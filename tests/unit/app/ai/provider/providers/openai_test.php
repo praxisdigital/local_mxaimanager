@@ -14,6 +14,7 @@ use local_mxaimanager\app\ai\provider\providers\interfaces\chat_completion;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_embedding;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_image;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_response;
+use local_mxaimanager\app\exceptions\invalid_provider_instance_configuration;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class openai_test extends \base_testcase
@@ -1088,7 +1089,7 @@ class openai_test extends \base_testcase
             $json_config
         );
 
-        $this->expectException(invalid_provider_instance_response::class);
+        $this->expectException(invalid_provider_instance_configuration::class);
 
         $provider->create_speech('Hello, world!');
     }
