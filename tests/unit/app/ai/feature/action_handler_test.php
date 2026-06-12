@@ -507,4 +507,89 @@ class action_handler_test extends base_testcase
         $this->assertEquals('{"partial":"value"}', $result);
     }
 
+    public function test_create_speech_success(): void
+    {
+        // Create minimal mocks needed
+        $base_factory_mock = $this->createMock(base_factory::class);
+        $handler_mock = $this->createMock(
+            \local_mxaimanager\app\ai\provider\providers\interfaces\create_speech::class
+        );
+
+        // Mock the protected provider instantiation method
+        $handler = $this->getMockBuilder(action_handler::class)
+            ->setConstructorArgs([$base_factory_mock])
+            ->onlyMethods(['get_provider_handler_provider_and_settings_json'])
+            ->getMock();
+
+        $handler->expects($this->once())
+            ->method('get_provider_handler_provider_and_settings_json')
+            ->with(5, ['tts_model' => 'tts-1'])
+            ->willReturn($handler_mock);
+
+        // Mock the speech call
+        $handler_mock->expects($this->once())
+            ->method('create_speech')
+            ->with('Hello world', 'alloy', 'mp3')
+            ->willReturn(
+                new \local_mxaimanager\app\ai\provider\create_speech_request(
+                    [
+                        'model' => 'tts-1',
+                        'input' => 'Hello world',
+                        'voice' => 'alloy',
+                        'response_format' => 'mp3',
+                    ],
+                    'fake audio binary content',
+                    'audio/mpeg',
+                    3,
+                    0
+                )
+            );
+
+        // Mock the DB logging
+        $db_mock = $this->createMock(\moodle_database::class);
+        $db_mock->expects($this->once())
+            ->method('insert_record');
+        $base_factory_mock->method('db')->willReturn($db_mock);
+
+        $user_mock = new \stdClass();
+        $user_mock->id = 1;
+        $base_factory_mock->method('user')->willReturn($user_mock);
+
+        // Execute test
+        $result = $handler->create_speech(new entity(), 'Hello world', 'alloy', 'mp3', 5, ['tts_model' => 'tts-1']);
+
+        // Assert
+        $this->assertInstanceOf(\local_mxaimanager\app\ai\provider\create_speech_request::class, $result);
+        $this->assertEquals('fake audio binary content', $result->get_audio_content());
+        $this->assertEquals('audio/mpeg', $result->get_content_type());
+        $this->assertEquals(3, $result->get_input_tokens());
+        $this->assertEquals(0, $result->get_output_tokens());
+    }
+
+    public function test_create_speech_provider_not_supporting_interface(): void
+    {
+        // Create instance of mock handler class that has methods but doesn't implement interfaces
+        $handler_instance = new MockHandlerWithoutInterface();
+
+        // Setup minimal mocks
+        $base_factory_mock = $this->createMock(base_factory::class);
+
+        // Mock handler instantiation
+        $handler = $this->getMockBuilder(action_handler::class)
+            ->setConstructorArgs([$base_factory_mock])
+            ->onlyMethods(['get_provider_handler_provider_and_settings_json'])
+            ->getMock();
+
+        $handler->expects($this->once())
+            ->method('get_provider_handler_provider_and_settings_json')
+            ->with(6, ['tts_model' => 'tts-1'])
+            ->willReturn($handler_instance);
+
+        // Execute test and expect exception
+        $this->expectException(invalid_provider_instance_configuration::class);
+        $this->expectExceptionMessage('Provider instance ID: 6 does not support speech synthesis');
+
+        $handler->create_speech(new entity(), 'Hello world', 'alloy', 'mp3', 6, ['tts_model' => 'tts-1']);
+    }
+
 }

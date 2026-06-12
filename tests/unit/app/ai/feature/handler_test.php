@@ -139,4 +139,72 @@ class handler_test extends base_testcase
         // Assert results
         $this->assertEquals([0.1, 0.2, 0.3], $result);
     }
+
+    public function test_create_speech(): void
+    {
+        // Set up mocks
+        $provider_resolver_mock = $this->createMock(provider_resolver::class);
+        $action_handler_mock = $this->createMock(action_handler::class);
+
+        // Configure the provider resolver to return expected values
+        $provider_resolver_mock->expects($this->once())
+            ->method('get_provider_and_config')
+            ->with(\local_mxaimanager\app\ai\provider\providers\interfaces\create_speech::class)
+            ->willReturn([3, ['tts_model' => 'tts-1']]);
+
+        // Create a mock create_speech_request to return
+        $speech_request_mock = $this->createMock(
+            \local_mxaimanager\app\ai\provider\create_speech_request::class
+        );
+
+        // Configure an action handler to return expected speech result
+        $action_handler_mock->expects($this->once())
+            ->method('create_speech')
+            ->with(
+                $this->isInstanceOf(entity::class),
+                $this->equalTo('Hello world'),
+                $this->equalTo('alloy'),
+                $this->equalTo('mp3'),
+                $this->equalTo(3),
+                $this->equalTo(['tts_model' => 'tts-1'])
+            )
+            ->willReturn($speech_request_mock);
+
+        // Create mock chains
+        $base_factory_mock = $this->createMock(base_factory::class);
+        $ai_factory_mock = $this->createMock(ai_factory::class);
+        $feature_factory_mock = $this->createMock(feature_factory::class);
+
+        // Set up a factory chain
+        $base_factory_mock->expects($this->exactly(2)) // 2 in constructor + 0 in method
+        ->method('ai')
+            ->willReturn($ai_factory_mock);
+
+        $ai_factory_mock->expects($this->exactly(2))
+            ->method('feature')
+            ->willReturn($feature_factory_mock);
+
+        $feature_factory_mock->expects($this->once())
+            ->method('provider_resolver')
+            ->willReturn($provider_resolver_mock);
+
+        $feature_factory_mock->expects($this->once())
+            ->method('action_handler')
+            ->willReturn($action_handler_mock);
+
+        // Create a mock feature entity
+        $feature_entity_mock = $this->createMock(entity::class);
+
+        // Instantiate handler
+        $handler = new handler($base_factory_mock, $feature_entity_mock);
+
+        // Execute test
+        $result = $handler->create_speech('Hello world');
+
+        // Assert results
+        $this->assertInstanceOf(
+            \local_mxaimanager\app\ai\provider\create_speech_request::class,
+            $result
+        );
+    }
 }
