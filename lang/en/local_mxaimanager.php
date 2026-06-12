@@ -44,6 +44,8 @@ $string['openai_transcription_model'] = 'OpenAI Transcription Model';
 $string['openai_transcription_model_help'] = 'Here you can specify the transcription model that should be used. For example: <strong>whisper-1</strong>. Refer to OpenAI\'s documentation for available transcription models.';
 $string['mistral_transcription_model'] = 'Mistral Transcription Model';
 $string['mistral_transcription_model_help'] = 'Here you can specify the transcription model that should be used. For example: <strong>mistral-whisper</strong>. Refer to Mistral\'s documentation for available transcription models.';
+$string['openai_tts_model'] = 'OpenAI TTS Model';
+$string['openai_tts_model_help'] = 'Here you can specify the text-to-speech model that should be used. For example: <strong>tts-1</strong>, <strong>tts-1-hd</strong>, etc. Refer to OpenAI\'s documentation for available TTS models.';
 
 // Manage Features
 $string['manage_features:title'] = 'AI Features';
@@ -59,6 +61,7 @@ $string['uses_chat'] = 'Chat';
 $string['uses_embedding'] = 'Embeddings';
 $string['uses_image'] = 'Image';
 $string['uses_audio_transcriptions'] = 'Audio Transcriptions';
+$string['uses_speech_synthesis'] = 'Speech Synthesis';
 
 $string['base_url'] = 'Base URL';
 $string['api_key'] = 'API Key';
@@ -66,11 +69,13 @@ $string['default_chat_model'] = 'Default Chat Model';
 $string['default_embedding_model'] = 'Default Embedding Model';
 $string['default_image_model'] = 'Default Image Model';
 $string['default_transcription_model'] = 'Default Transcription Model';
+$string['default_tts_model'] = 'Default TTS Model';
 $string['provider_settings'] = 'Provider Settings';
 $string['supports_chat'] = 'Supports Chat';
 $string['supports_embedding'] = 'Supports Embedding';
 $string['supports_image'] = 'Supports Image';
 $string['supports_audio_transcriptions'] = 'Supports Audio Transcriptions';
+$string['supports_speech_synthesis'] = 'Supports Speech Synthesis';
 $string['provider_supports'] = 'Provider Capabilities';
 $string['default_action_providers'] = 'Default Action Provider instances';
 $string['here_you_define_default_action_providers'] = 'Here you define which provider instances should be used by default for each action.';

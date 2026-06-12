@@ -8,10 +8,12 @@ defined('MOODLE_INTERNAL') || die();
 
 // @codeCoverageIgnoreEnd
 
+use local_mxaimanager\app\ai\provider\create_speech_request;
 use local_mxaimanager\app\ai\provider\message;
 use local_mxaimanager\app\ai\provider\providers\interfaces\chat_completion;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_embedding;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_image;
+use local_mxaimanager\app\ai\provider\providers\interfaces\create_speech;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_transcription;
 use local_mxaimanager\app\ai\provider\transcription;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_configuration;
@@ -343,5 +345,55 @@ class action_handler
         ]);
 
         return $create_transcription_request->get_response();
+    }
+
+    /**
+     * @param entity $feature
+     * @param string $input The text to synthesize.
+     * @param string $voice The voice to use.
+     * @param string $response_format The audio format.
+     * @param int $provider_id
+     * @param array $config_json
+     * @return create_speech_request
+     * @throws invalid_provider_instance_configuration
+     * @throws invalid_provider_instance_response
+     */
+    public function create_speech(
+        entity $feature,
+        string $input,
+        string $voice,
+        string $response_format,
+        int $provider_id,
+        array $config_json
+    ): create_speech_request {
+        // Get the provider handler.
+        $handler = $this->get_provider_handler_provider_and_settings_json(
+            $provider_id,
+            $config_json
+        );
+
+        // Validate interface.
+        if (!($handler instanceof create_speech)) {
+            throw new invalid_provider_instance_configuration(
+                'Provider instance ID: ' . $provider_id . ' does not support speech synthesis'
+            );
+        }
+
+        // Make the speech synthesis request.
+        $create_speech_request = $handler->create_speech($input, $voice, $response_format);
+
+        // Log the request and response.
+        $this->base_factory->db()->insert_record('local_mxaimanager_feature_action_usage_logs', [
+            'feature_id' => $feature->get_id(),
+            'request_json' => json_encode($create_speech_request->get_request_json(), JSON_THROW_ON_ERROR),
+            'response_json' => json_encode($create_speech_request->jsonSerialize(), JSON_THROW_ON_ERROR),
+            'input_tokens' => $create_speech_request->get_input_tokens(),
+            'output_tokens' => $create_speech_request->get_output_tokens(),
+            'session_id' => session_id(),
+            'user_id' => $this->base_factory->user()->id,
+            'timecreated' => time(),
+        ]);
+
+        return $create_speech_request;
     }
 }
