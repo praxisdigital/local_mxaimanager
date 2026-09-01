@@ -219,6 +219,48 @@ class elevenlabs_test extends \advanced_testcase
         $this->assertEquals('wss://example.test/ws', $url);
     }
 
+    public function test_create_conversational_agent_json_decode_error(): void
+    {
+        $this->mock_curl->expects($this->once())
+            ->method('post')
+            ->willReturn('not-json');
+
+        $this->mock_curl->method('get_info')->willReturn(['http_code' => 200]);
+
+        $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
+            $this->mock_base_factory,
+            [
+                'api_key' => 'test_key',
+                'tts_voice' => 'voice123',
+            ]
+        );
+
+        $this->expectException(invalid_provider_instance_response::class);
+        $this->expectExceptionMessage('Invalid JSON response from ElevenLabs');
+        $provider->create_conversational_agent('agent-1', ['agent' => ['language' => 'da']]);
+    }
+
+    public function test_get_signed_conversation_url_json_decode_error(): void
+    {
+        $this->mock_curl->expects($this->once())
+            ->method('get')
+            ->willReturn('not-json');
+
+        $this->mock_curl->method('get_info')->willReturn(['http_code' => 200]);
+
+        $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
+            $this->mock_base_factory,
+            [
+                'api_key' => 'test_key',
+                'tts_voice' => 'voice123',
+            ]
+        );
+
+        $this->expectException(invalid_provider_instance_response::class);
+        $this->expectExceptionMessage('Invalid JSON response from ElevenLabs');
+        $provider->get_signed_conversation_url('agt_1');
+    }
+
     public function test_delete_conversational_agent_swallows_errors(): void
     {
         $this->mock_curl->expects($this->once())

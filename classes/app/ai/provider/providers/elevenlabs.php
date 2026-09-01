@@ -202,7 +202,7 @@ class elevenlabs extends provider implements interfaces\create_audio
 
         try {
             // Prefer binary audio over JSON error bodies.
-            $this->curl->setHeader(['Accept: audio/mpeg, application/octet-stream, */*']);
+            $this->curl->setHeader(['Accept: audio/*, application/octet-stream, */*']);
             $response = $this->curl->post($url, json_encode($payload, JSON_THROW_ON_ERROR));
 
             $decoded = json_decode($response, true);
@@ -321,7 +321,21 @@ class elevenlabs extends provider implements interfaces\create_audio
             return [];
         }
 
-        $decoded = json_decode((string) $rawresponse, true);
-        return is_array($decoded) ? $decoded : [];
+        try {
+            $decoded = json_decode((string) $rawresponse, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new invalid_provider_instance_response(
+                'Invalid JSON response from ElevenLabs: ' . $e->getMessage(),
+                previous: $e
+            );
+        }
+
+        if (!is_array($decoded)) {
+            throw new invalid_provider_instance_response(
+                'Invalid JSON response from ElevenLabs: expected object or array'
+            );
+        }
+
+        return $decoded;
     }
 }
