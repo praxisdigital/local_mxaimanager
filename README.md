@@ -108,12 +108,33 @@ die();
 
 ```
 
+## Providers
+
+### ElevenLabs
+
+Supports text-to-speech (`create_audio`) and Conversational AI helpers (agent create/signed URL/delete).
+
+TTS `output_format` values come from the ElevenLabs Text-to-Speech API (`output_format` query parameter):
+
+- Docs: https://elevenlabs.io/docs/api-reference/text-to-speech/convert
+- Shape: `codec_sample_rate_bitrate` (default `mp3_44100_128`)
+
+The provider allowlist (`TTS_ALLOWED_FORMATS` in `classes/app/ai/provider/providers/elevenlabs.php`) is a curated subset:
+
+- `mp3_44100_128`, `mp3_44100_192`, `mp3_22050_32`
+- `pcm_16000`, `pcm_22050`, `pcm_24000`, `pcm_44100`
+- `ulaw_8000`
+
+The API may expose additional formats (e.g. `opus_*`, `wav_*`, other `mp3_*`/`pcm_*`). Expanding support means updating that constant and tests. OpenAI TTS formats (`mp3`, `opus`, …) are separate and follow OpenAI’s API.
+
 ## GDPR
 
 None
 
 ## Change log
 
+* **1.1.0 (2026082700)**
+    - Added Elevenlabs AI provider
 * **1.0.6 (2026081100)**
     - Fixed bug with providers using chat completion and sending multiple system role messages in the messages array
 * **1.0.5 (2026040700)**

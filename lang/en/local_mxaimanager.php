@@ -50,6 +50,14 @@ $string['openai_tts_voice'] = 'OpenAI Text-to-Speech Voice';
 $string['openai_tts_voice_help'] = 'Voice used to synthesize the audio. OpenAI currently supports: <strong>alloy</strong>, <strong>echo</strong>, <strong>fable</strong>, <strong>onyx</strong>, <strong>nova</strong>, <strong>shimmer</strong>.';
 $string['openai_tts_format'] = 'OpenAI Text-to-Speech Format';
 $string['openai_tts_format_help'] = 'Audio container format returned by OpenAI. <strong>mp3</strong> is the safest choice for the HTML5 audio tag; <strong>opus</strong>, <strong>aac</strong>, <strong>flac</strong>, <strong>wav</strong> and <strong>pcm</strong> are also supported.';
+$string['elevenlabs_api_key'] = 'ElevenLabs API key';
+$string['elevenlabs_api_key_help'] = 'API key from the ElevenLabs account (header <strong>xi-api-key</strong>). Find keys at https://elevenlabs.io/app/settings/api-keys';
+$string['elevenlabs_tts_voice'] = 'ElevenLabs voice ID';
+$string['elevenlabs_tts_voice_help'] = 'The ElevenLabs <strong>voice_id</strong> used for text-to-speech and as the default voice for Conversational AI agents. Find voices at https://elevenlabs.io/app/voice-lab';
+$string['elevenlabs_tts_model'] = 'ElevenLabs TTS model';
+$string['elevenlabs_tts_model_help'] = 'Model id for speech synthesis, e.g. <strong>eleven_multilingual_v2</strong> or <strong>eleven_turbo_v2_5</strong>.';
+$string['elevenlabs_tts_format'] = 'ElevenLabs TTS output format';
+$string['elevenlabs_tts_format_help'] = 'Output format for the speech API, e.g. <strong>mp3_44100_128</strong>. See ElevenLabs documentation for available formats.';
 
 // Manage Features
 $string['manage_features:title'] = 'AI Features';
