@@ -50,6 +50,14 @@ $string['openai_tts_voice'] = 'OpenAI Text-to-Speech Stemme';
 $string['openai_tts_voice_help'] = 'Stemme der bruges til at syntetisere lyden. OpenAI understøtter aktuelt: <strong>alloy</strong>, <strong>echo</strong>, <strong>fable</strong>, <strong>onyx</strong>, <strong>nova</strong>, <strong>shimmer</strong>.';
 $string['openai_tts_format'] = 'OpenAI Text-to-Speech Format';
 $string['openai_tts_format_help'] = 'Lydcontainerformat returneret af OpenAI. <strong>mp3</strong> er det sikreste valg for HTML5 audio-tagget; <strong>opus</strong>, <strong>aac</strong>, <strong>flac</strong>, <strong>wav</strong> og <strong>pcm</strong> understøttes også.';
+$string['elevenlabs_api_key'] = 'ElevenLabs API-nøgle';
+$string['elevenlabs_api_key_help'] = 'API-nøgle fra ElevenLabs-kontoen (header <strong>xi-api-key</strong>). Find nøgler på https://elevenlabs.io/app/settings/api-keys';
+$string['elevenlabs_tts_voice'] = 'ElevenLabs voice-ID';
+$string['elevenlabs_tts_voice_help'] = 'ElevenLabs <strong>voice_id</strong> til text-to-speech og som standardstemme for Conversational AI-agenter. Find stemmer på https://elevenlabs.io/app/voice-lab';
+$string['elevenlabs_tts_model'] = 'ElevenLabs TTS-model';
+$string['elevenlabs_tts_model_help'] = 'Model-id til talesyntese, f.eks. <strong>eleven_multilingual_v2</strong> eller <strong>eleven_turbo_v2_5</strong>.';
+$string['elevenlabs_tts_format'] = 'ElevenLabs TTS-outputformat';
+$string['elevenlabs_tts_format_help'] = 'Outputformat til speech-API\'en, f.eks. <strong>mp3_44100_128</strong>. Se ElevenLabs-dokumentationen for tilgængelige formater.';
 
 // Manage Features
 $string['manage_features:title'] = 'AI Funktioner';
