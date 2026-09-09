@@ -93,6 +93,12 @@ $embedding = $feature_handler->create_embedding(
     $dimension
 );
 
+/** Vision (read images with a dedicated vision model) **/
+$vision_text = $feature_handler->vision(
+    'Describe this image.',
+    ['/path/to/image.jpg']
+);
+
 var_dump([
     'chat_completion' => [
         'messages' => $messages,
@@ -102,6 +108,9 @@ var_dump([
         'input' => $input,
         'dimension' => $dimension,
         'response' => $embedding
+    ],
+    'vision' => [
+        'response' => $vision_text
     ]
 ]);
 die();
@@ -114,6 +123,14 @@ None
 
 ## Change log
 
+* **1.0.9 (2026090900)**
+    - Fixed a TypeError when resolving a preconfigured provider whose class is no longer installed.
+    - Provider instances pointing at an unknown class now raise invalid_provider_instance_configuration instead of a fatal error.
+* **1.0.8 (2026082100)**
+    - Fixed embedding requests sending dimensions: 0 when no dimension is configured.
+* **1.0.7 (2026081801)**
+    - Added vision action (read images with a dedicated vision model).
+    - Added Scaleway provider.
 * **1.0.6 (2026081100)**
     - Fixed bug with providers using chat completion and sending multiple system role messages in the messages array
 * **1.0.5 (2026040700)**

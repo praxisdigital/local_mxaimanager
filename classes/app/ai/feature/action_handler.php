@@ -14,6 +14,7 @@ use local_mxaimanager\app\ai\provider\providers\interfaces\create_audio;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_embedding;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_image;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_transcription;
+use local_mxaimanager\app\ai\provider\providers\interfaces\vision;
 use local_mxaimanager\app\ai\provider\transcription;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_configuration;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_response;
@@ -35,9 +36,18 @@ class action_handler
     }
 
     /**
+     * @return int
+     */
+    private function current_user_id(): int
+    {
+        return (int) ($this->base_factory->user()->id ?? 0);
+    }
+
+    /**
      * @param int $provider_id
      * @param array $config_json
      * @return chat_completion|create_embedding
+     * @throws invalid_provider_instance_configuration
      */
     protected function get_provider_handler_provider_and_settings_json(
         int $provider_id,
@@ -48,6 +58,15 @@ class action_handler
 
         // Get the provider handler classname.
         $provider_handler_classname = $provider->get_classname();
+
+        // The stored classname can point at a provider that is no longer installed.
+        // Fail with the documented exception instead of a fatal "class not found".
+        if (!class_exists($provider_handler_classname)) {
+            throw new invalid_provider_instance_configuration(
+                'Provider instance ID: ' . $provider_id . ' refers to an unknown provider class: '
+                . $provider_handler_classname
+            );
+        }
 
         // Create the provider handler.
         return new $provider_handler_classname($this->base_factory, $config_json);
@@ -178,7 +197,7 @@ class action_handler
             'input_tokens' => $chat_completion_request->get_input_tokens(),
             'output_tokens' => $chat_completion_request->get_output_tokens(),
             'session_id' => session_id(),
-            'user_id' => $this->base_factory->user()->id,
+            'user_id' => $this->current_user_id(),
             'timecreated' => time(),
         ]);
     }
@@ -244,7 +263,7 @@ class action_handler
             'input_tokens' => $create_embedding_request->get_input_tokens(),
             'output_tokens' => $create_embedding_request->get_output_tokens(),
             'session_id' => session_id(),
-            'user_id' => $this->base_factory->user()->id,
+            'user_id' => $this->current_user_id(),
             'timecreated' => time(),
         ]);
 
@@ -293,7 +312,7 @@ class action_handler
             'input_tokens' => $create_image_request->get_input_tokens(),
             'output_tokens' => $create_image_request->get_output_tokens(),
             'session_id' => session_id(),
-            'user_id' => $this->base_factory->user()->id,
+            'user_id' => $this->current_user_id(),
             'timecreated' => time(),
         ]);
 
@@ -339,7 +358,7 @@ class action_handler
             'input_tokens' => $create_transcription_request->get_input_tokens(),
             'output_tokens' => $create_transcription_request->get_output_tokens(),
             'session_id' => session_id(),
-            'user_id' => $this->base_factory->user()->id,
+            'user_id' => $this->current_user_id(),
             'timecreated' => time(),
         ]);
 
@@ -385,10 +404,88 @@ class action_handler
             'input_tokens' => $create_audio_request->get_input_tokens(),
             'output_tokens' => $create_audio_request->get_output_tokens(),
             'session_id' => session_id(),
-            'user_id' => $this->base_factory->user()->id,
+            'user_id' => $this->current_user_id(),
             'timecreated' => time(),
         ]);
 
         return $create_audio_request->get_response();
+    }
+
+    /**
+     * @param entity $feature
+     * @param string $prompt
+     * @param string[] $image_filepaths
+     * @param int $provider_id
+     * @param array $config_json
+     * @return string
+     * @throws invalid_provider_instance_configuration
+     * @throws invalid_provider_instance_response
+     */
+    public function vision(
+        entity $feature,
+        string $prompt,
+        array $image_filepaths,
+        int $provider_id,
+        array $config_json
+    ): string {
+        $handler = $this->get_provider_handler_provider_and_settings_json(
+            $provider_id,
+            $config_json
+        );
+
+        if (!($handler instanceof vision)) {
+            throw new invalid_provider_instance_configuration(
+                'Provider instance ID: ' . $provider_id . ' does not support vision'
+            );
+        }
+
+        $vision_request = $handler->vision($prompt, $image_filepaths);
+
+        $this->base_factory->db()->insert_record('local_mxaimanager_feature_action_usage_logs', [
+            'feature_id' => $feature->get_id(),
+            'request_json' => json_encode(
+                $this->redact_vision_request_for_log($vision_request->get_request_json()),
+                JSON_THROW_ON_ERROR
+            ),
+            'response_json' => json_encode($vision_request->get_response_json(), JSON_THROW_ON_ERROR),
+            'input_tokens' => $vision_request->get_input_tokens(),
+            'output_tokens' => $vision_request->get_output_tokens(),
+            'session_id' => session_id(),
+            'user_id' => $this->current_user_id(),
+            'timecreated' => time(),
+        ]);
+
+        return $vision_request->get_response();
+    }
+
+    /**
+     * Drop raw image bytes from usage logs.
+     *
+     * @param array $request_json
+     * @return array
+     */
+    private function redact_vision_request_for_log(array $request_json): array
+    {
+        if (!isset($request_json['messages']) || !is_array($request_json['messages'])) {
+            return $request_json;
+        }
+
+        foreach ($request_json['messages'] as &$message) {
+            if (isset($message['images']) && is_array($message['images'])) {
+                $message['images'] = array_fill(0, count($message['images']), '[image]');
+            }
+            if (!isset($message['content']) || !is_array($message['content'])) {
+                continue;
+            }
+            foreach ($message['content'] as &$part) {
+                if (($part['type'] ?? '') === 'image_url') {
+                    $part['image_url']['url'] = '[image]';
+                }
+            }
+            unset($part);
+        }
+        unset($message);
+
+        return $request_json;
     }
 }
