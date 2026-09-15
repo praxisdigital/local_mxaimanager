@@ -110,9 +110,98 @@ die();
 
 ## Providers
 
+Configure provider instances under the plugin manage providers UI. Built-in types: OpenAI, Mistral, Nebius, Ollama, ElevenLabs.
+
+### OpenAI
+
+Supports chat completion, embeddings, image generation, audio transcription, and text-to-speech (`create_audio`).
+
+- Default base URL: `https://api.openai.com`
+- Required config: `base_url`, `api_key`, `chat_model`, `embedding_model`, `image_model`, `transcription_model`, `tts_model`
+- Optional TTS: `tts_voice` (default `alloy`), `tts_format` (default `mp3`)
+
+Example models (see OpenAI docs for current availability):
+
+- Chat: `gpt-4`, `gpt-3.5-turbo`
+- Embedding: `text-embedding-3-small`, `text-embedding-3-large`
+- Image: `dall-e-3`, `dall-e-2`
+- Transcription: `whisper-1`
+- TTS: `tts-1`, `tts-1-hd`
+
+TTS voices allowlist (`TTS_ALLOWED_VOICES` in `classes/app/ai/provider/providers/openai.php`):
+
+- `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`
+
+TTS formats allowlist (`TTS_ALLOWED_FORMATS`):
+
+- `mp3`, `opus`, `aac`, `flac`, `wav`, `pcm`
+
+API notes:
+
+- Chat/embeddings/images/transcription/TTS use OpenAI-compatible `/v1/...` endpoints
+- Image generation requires base64 (`b64_json`); URL-only responses are not supported
+- TTS returns raw audio bytes (not JSON)
+
+### Mistral
+
+Supports chat completion, embeddings, and audio transcription.
+
+- Default base URL: `https://api.mistral.ai`
+- Required config: `base_url`, `api_key`, `chat_model`, `embedding_model`, `transcription_model`
+
+Example models (see Mistral docs for current availability):
+
+- Chat: `mistral-large`, `mistral-small`
+- Embedding: `mistral-embed`
+- Transcription: `mistral-whisper`
+
+API notes:
+
+- Chat/embeddings/transcription use OpenAI-style `/v1/...` paths on the Mistral host
+- Embedding dimension is sent as `output_dimension` (not `dimensions`)
+
+### Nebius
+
+Supports chat completion and embeddings only. Text-to-image support was removed.
+
+- Default base URL: `https://api.tokenfactory.nebius.com`
+- Required config: `base_url`, `api_key`, `chat_model`, `embedding_model`
+
+Example models (see Nebius docs for current availability):
+
+- Chat: `Qwen/Qwen3-32B-fast`, `Qwen/Qwen3-30B-A3B-Instruct-2507`
+- Embedding: `Qwen/Qwen3-Embedding-8B`
+
+API notes:
+
+- Uses OpenAI-compatible `/v1/chat/completions` and `/v1/embeddings`
+- Embedding dimension is sent as `dimensions`
+
+### Ollama
+
+Supports chat completion and embeddings for self-hosted Ollama servers.
+
+- Default base URL: none (set to your Ollama host, e.g. `http://localhost:11434`)
+- Required config: `base_url`, `api_key`, `chat_model`, `embedding_model` (`api_key` is required by the form even if your Ollama setup does not enforce auth)
+
+Example models (depend on what is pulled on the Ollama host):
+
+- Chat: `llama2`, `vicuna`
+- Embedding: `nomic-embed-text`
+
+API notes:
+
+- Uses native Ollama endpoints `/api/chat` and `/api/embed` (not `/v1`)
+- JSON mode uses Ollama `format` (`json` or a JSON schema object)
+- Chat requests are non-streaming (`stream: false`)
+
 ### ElevenLabs
 
 Supports text-to-speech (`create_audio`) and Conversational AI helpers (agent create/signed URL/delete).
+
+- Default base URL: `https://api.elevenlabs.io`
+- Required config: `base_url`, `api_key`, `tts_voice` (ElevenLabs `voice_id`)
+- Optional TTS: `tts_model` (default `eleven_multilingual_v2`), `tts_format` (default `mp3_44100_128`)
 
 TTS `output_format` values come from the ElevenLabs Text-to-Speech API (`output_format` query parameter):
 
@@ -126,6 +215,8 @@ The provider allowlist (`TTS_ALLOWED_FORMATS` in `classes/app/ai/provider/provid
 - `ulaw_8000`
 
 The API may expose additional formats (e.g. `opus_*`, `wav_*`, other `mp3_*`/`pcm_*`). Expanding support means updating that constant and tests. OpenAI TTS formats (`mp3`, `opus`, …) are separate and follow OpenAI’s API.
+
+Provider-specific helpers (not standard action interfaces): `create_conversational_agent`, `get_signed_conversation_url`, `delete_conversational_agent`.
 
 ## GDPR
 

@@ -19,7 +19,6 @@ use local_mxaimanager\app\factory as base_factory;
  */
 class elevenlabs extends provider implements interfaces\create_audio
 {
-    private const DEFAULT_BASE_URL = 'https://api.elevenlabs.io';
     private const DEFAULT_TTS_MODEL = 'eleven_multilingual_v2';
     private const DEFAULT_TTS_FORMAT = 'mp3_44100_128';
     private const TTS_ALLOWED_FORMATS = [
@@ -46,12 +45,12 @@ class elevenlabs extends provider implements interfaces\create_audio
     public function __construct(base_factory $base_factory, array $json_config)
     {
         $this->base_factory = $base_factory;
-        $this->base_url = rtrim((string) ($json_config['base_url'] ?? self::DEFAULT_BASE_URL), '/');
-        $this->api_key = (string) ($json_config['api_key'] ?? '');
+        $this->base_url = $json_config['base_url'] ?? '';
+        $this->api_key = $json_config['api_key'] ?? '';
         // Accept both tts_voice (form/config convention) and voice_id (ElevenLabs naming).
-        $this->tts_voice = (string) ($json_config['tts_voice'] ?? $json_config['voice_id'] ?? '');
-        $this->tts_model = (string) ($json_config['tts_model'] ?? self::DEFAULT_TTS_MODEL);
-        $this->tts_format = (string) ($json_config['tts_format'] ?? self::DEFAULT_TTS_FORMAT);
+        $this->tts_voice = $json_config['tts_voice'] ?? '';
+        $this->tts_model = $json_config['tts_model'] ?? '';
+        $this->tts_format = $json_config['tts_format'] ?? '';
 
         if ($this->base_url === '' || $this->api_key === '') {
             throw new invalid_provider_instance_configuration('ElevenLabs is missing base url and/or api key');
@@ -78,7 +77,11 @@ class elevenlabs extends provider implements interfaces\create_audio
      */
     public function get_tts_model(): string
     {
-        return $this->tts_model !== '' ? $this->tts_model : self::DEFAULT_TTS_MODEL;
+        if (empty($this->tts_model)) {
+            throw new invalid_provider_instance_configuration('Elevenlabs TTS model is not configured');
+        }
+
+        return $this->tts_model;
     }
 
     private static function add_tts_voice_field(\MoodleQuickForm $mform, string $element_name_prefix): void
@@ -130,7 +133,7 @@ class elevenlabs extends provider implements interfaces\create_audio
     {
         $mform->addElement('text', "{$element_name_prefix}base_url", get_string('base_url', 'local_mxaimanager'));
         $mform->setType("{$element_name_prefix}base_url", PARAM_URL);
-        $mform->setDefault("{$element_name_prefix}base_url", self::DEFAULT_BASE_URL);
+        $mform->setDefault("{$element_name_prefix}base_url", 'https://api.elevenlabs.io');
 
         $mform->addElement('text', "{$element_name_prefix}api_key", get_string('api_key', 'local_mxaimanager'));
         $mform->setType("{$element_name_prefix}api_key", PARAM_TEXT);
@@ -179,11 +182,14 @@ class elevenlabs extends provider implements interfaces\create_audio
      */
     public function create_audio(string $text): create_audio_request
     {
-        if ($this->tts_voice === '') {
+        if (empty($this->tts_voice)) {
             throw new invalid_provider_instance_configuration('ElevenLabs TTS voice id is not configured');
         }
 
-        $model = $this->tts_model !== '' ? $this->tts_model : self::DEFAULT_TTS_MODEL;
+        if (empty($this->tts_model)) {
+            throw new invalid_provider_instance_configuration('Elevenlabs TTS model is not configured');
+        }
+
         $format = $this->tts_format !== '' ? $this->tts_format : self::DEFAULT_TTS_FORMAT;
         if (!in_array($format, self::TTS_ALLOWED_FORMATS, true)) {
             throw new invalid_provider_instance_configuration(
@@ -194,7 +200,7 @@ class elevenlabs extends provider implements interfaces\create_audio
 
         $payload = [
             'text' => $text,
-            'model_id' => $model,
+            'model_id' => $this->tts_model,
         ];
 
         $url = $this->base_url . '/v1/text-to-speech/' . rawurlencode($this->tts_voice)
