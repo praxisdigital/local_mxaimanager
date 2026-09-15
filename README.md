@@ -200,8 +200,9 @@ API notes:
 Supports text-to-speech (`create_audio`) and Conversational AI helpers (agent create/signed URL/delete).
 
 - Default base URL: `https://api.elevenlabs.io`
-- Required config: `base_url`, `api_key`, `tts_voice` (ElevenLabs `voice_id`)
-- Optional TTS: `tts_model` (default `eleven_multilingual_v2`), `tts_format` (default `mp3_44100_128`)
+- Required config: `base_url`, `api_key`, `tts_voice` (ElevenLabs voice id), `tts_model`
+- Optional TTS: `tts_format` (default `mp3_44100_128`)
+- Form default for `tts_model` is `eleven_multilingual_v2`; config must still set it (not optional at runtime)
 
 TTS `output_format` values come from the ElevenLabs Text-to-Speech API (`output_format` query parameter):
 

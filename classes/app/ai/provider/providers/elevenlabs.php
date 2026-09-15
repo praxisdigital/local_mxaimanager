@@ -47,7 +47,6 @@ class elevenlabs extends provider implements interfaces\create_audio
         $this->base_factory = $base_factory;
         $this->base_url = $json_config['base_url'] ?? '';
         $this->api_key = $json_config['api_key'] ?? '';
-        // Accept both tts_voice (form/config convention) and voice_id (ElevenLabs naming).
         $this->tts_voice = $json_config['tts_voice'] ?? '';
         $this->tts_model = $json_config['tts_model'] ?? '';
         $this->tts_format = $json_config['tts_format'] ?? '';
@@ -159,6 +158,10 @@ class elevenlabs extends provider implements interfaces\create_audio
 
         if (empty($data["{$element_name_prefix}tts_voice"])) {
             $errors["{$element_name_prefix}tts_voice"] = get_string('required');
+        }
+
+        if (empty($data["{$element_name_prefix}tts_model"])) {
+            $errors["{$element_name_prefix}tts_model"] = get_string('required');
         }
 
         return $errors;

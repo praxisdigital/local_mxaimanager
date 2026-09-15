@@ -35,24 +35,13 @@ class elevenlabs_test extends \advanced_testcase
                 'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
         $this->assertInstanceOf(\local_mxaimanager\app\ai\provider\providers\elevenlabs::class, $provider);
         $this->assertEquals('voice123', $provider->get_tts_voice());
-    }
-
-    public function test_constructor_accepts_voice_id_alias(): void
-    {
-        $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
-            $this->mock_base_factory,
-            [
-                'api_key' => 'test_key',
-                'voice_id' => 'alias-voice',
-            ]
-        );
-
-        $this->assertEquals('alias-voice', $provider->get_tts_voice());
+        $this->assertEquals('eleven_multilingual_v2', $provider->get_tts_model());
     }
 
     public function test_constructor_missing_api_key(): void
@@ -76,6 +65,7 @@ class elevenlabs_test extends \advanced_testcase
         $this->assertArrayHasKey('prefix_base_url', $errors);
         $this->assertArrayHasKey('prefix_api_key', $errors);
         $this->assertArrayHasKey('prefix_tts_voice', $errors);
+        $this->assertArrayHasKey('prefix_tts_model', $errors);
     }
 
     public function test_moodleform_definition_adds_elements(): void
@@ -122,6 +112,7 @@ class elevenlabs_test extends \advanced_testcase
                 'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
@@ -147,6 +138,22 @@ class elevenlabs_test extends \advanced_testcase
         $provider->create_audio('Test');
     }
 
+    public function test_create_audio_missing_tts_model(): void
+    {
+        $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
+            $this->mock_base_factory,
+            [
+                'base_url' => 'https://api.elevenlabs.io',
+                'api_key' => 'test_key',
+                'tts_voice' => 'voice123',
+            ]
+        );
+
+        $this->expectException(invalid_provider_instance_configuration::class);
+        $this->expectExceptionMessage('Elevenlabs TTS model is not configured');
+        $provider->create_audio('Test');
+    }
+
     public function test_create_audio_json_error_response(): void
     {
         $this->mock_curl->expects($this->once())
@@ -156,8 +163,10 @@ class elevenlabs_test extends \advanced_testcase
         $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
             $this->mock_base_factory,
             [
+                'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
@@ -185,8 +194,10 @@ class elevenlabs_test extends \advanced_testcase
         $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
             $this->mock_base_factory,
             [
+                'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
@@ -210,8 +221,10 @@ class elevenlabs_test extends \advanced_testcase
         $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
             $this->mock_base_factory,
             [
+                'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
@@ -230,8 +243,10 @@ class elevenlabs_test extends \advanced_testcase
         $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
             $this->mock_base_factory,
             [
+                'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
@@ -251,8 +266,10 @@ class elevenlabs_test extends \advanced_testcase
         $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
             $this->mock_base_factory,
             [
+                'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
@@ -270,8 +287,10 @@ class elevenlabs_test extends \advanced_testcase
         $provider = new \local_mxaimanager\app\ai\provider\providers\elevenlabs(
             $this->mock_base_factory,
             [
+                'base_url' => 'https://api.elevenlabs.io',
                 'api_key' => 'test_key',
                 'tts_voice' => 'voice123',
+                'tts_model' => 'eleven_multilingual_v2',
             ]
         );
 
