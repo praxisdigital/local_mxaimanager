@@ -26,6 +26,7 @@ class factory_test extends \base_testcase
             \local_mxaimanager\app\ai\provider\providers\openai::class,
             \local_mxaimanager\app\ai\provider\providers\mistral::class,
             \local_mxaimanager\app\ai\provider\providers\ollama::class,
+            \local_mxaimanager\app\ai\provider\providers\elevenlabs::class,
         ];
 
         foreach ($expected_providers as $provider_class) {
@@ -84,10 +85,14 @@ class factory_test extends \base_testcase
             \local_mxaimanager\app\ai\provider\providers\interfaces\create_audio::class
         );
 
-        // OpenAI is the only provider implementing the TTS interface in this phase.
+        // OpenAI and ElevenLabs implement the TTS interface.
         $this->assertIsArray($audio_providers);
         $this->assertContains(
             \local_mxaimanager\app\ai\provider\providers\openai::class,
+            $audio_providers
+        );
+        $this->assertContains(
+            \local_mxaimanager\app\ai\provider\providers\elevenlabs::class,
             $audio_providers
         );
 
