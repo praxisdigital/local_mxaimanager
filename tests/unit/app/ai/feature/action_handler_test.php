@@ -39,10 +39,18 @@ class MockHandlerWithoutInterface
 
 class action_handler_test extends base_testcase
 {
+    private function create_factory_mock(): base_factory
+    {
+        $factory = $this->createMock(base_factory::class);
+        $factory->method('user')->willReturn((object)['id' => 0]);
+
+        return $factory;
+    }
+
     public function test_chat_completion_success(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -83,7 +91,7 @@ class action_handler_test extends base_testcase
         $handler_instance = new MockHandlerWithoutInterface();
 
         // Setup minimal mocks
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
 
         // Mock handler instantiation
         $handler = $this->getMockBuilder(action_handler::class)
@@ -108,7 +116,7 @@ class action_handler_test extends base_testcase
     public function test_create_embedding_success(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(create_embedding::class);
 
         // Mock the protected provider instantiation method
@@ -169,7 +177,7 @@ class action_handler_test extends base_testcase
         $handler_instance = new MockHandlerWithoutInterface();
 
         // Setup minimal mocks
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
 
         // Mock handler instantiation
         $handler = $this->getMockBuilder(action_handler::class)
@@ -192,7 +200,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_continuation_with_json_mode(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -229,7 +237,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_no_continuation_for_non_json_mode(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -264,7 +272,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_continuation_max_retries_respected(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -308,7 +316,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_continuation_with_json_schema(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -352,7 +360,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_strips_markdown_json_wrapper_with_json_mode(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -383,7 +391,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_strips_markdown_wrapper_without_language_tag(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -415,7 +423,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_does_not_strip_markdown_for_non_json_mode(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -446,7 +454,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_returns_clean_json_unchanged(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -477,7 +485,7 @@ class action_handler_test extends base_testcase
     public function test_chat_completion_strips_markdown_wrapper_from_continuation_response(): void
     {
         // Create minimal mocks needed
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $handler_mock = $this->createMock(chat_completion::class);
 
         // Mock the protected provider instantiation method
@@ -511,7 +519,7 @@ class action_handler_test extends base_testcase
 
     public function test_create_audio_success(): void
     {
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
         $provider_handler_mock = $this->createMock(create_audio::class);
 
         $handler = $this->getMockBuilder(action_handler::class)
@@ -546,7 +554,7 @@ class action_handler_test extends base_testcase
         // nor any other action interface) to trigger the validation error.
         $handler_instance = new MockHandlerWithoutInterface();
 
-        $base_factory_mock = $this->createMock(base_factory::class);
+        $base_factory_mock = $this->create_factory_mock();
 
         $handler = $this->getMockBuilder(action_handler::class)
             ->setConstructorArgs([$base_factory_mock])
