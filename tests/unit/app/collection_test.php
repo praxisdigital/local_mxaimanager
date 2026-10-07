@@ -90,6 +90,25 @@ class collection_test extends \base_testcase
         $this->assertEquals([1, 2, 3], $result);
     }
 
+    public function test_empty_iterator_is_invalid(): void
+    {
+        $collection = new collection();
+        $this->assertFalse($collection->valid());
+        $this->assertSame([], iterator_to_array($collection));
+    }
+
+    public function test_iterator_preserves_null_values_and_empty_string_keys(): void
+    {
+        $collection = new collection(['' => null, 4 => false]);
+        $this->assertTrue($collection->valid());
+        $this->assertSame('', $collection->key());
+        $collection->next();
+        $this->assertTrue($collection->valid());
+        $collection->next();
+        $this->assertFalse($collection->valid());
+        $this->assertSame(['' => null, 4 => false], iterator_to_array($collection));
+    }
+
     public function test_iterator_methods(): void
     {
         $collection = new collection([1, 2, 3]);

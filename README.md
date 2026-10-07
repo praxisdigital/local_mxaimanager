@@ -225,6 +225,12 @@ None
 
 ## Change log
 
+* **1.1.1 (2026100700)**
+    * Fix management page failures on PHP 8.5 when provider collections are empty or exhausted.
+    * Preserve iterator termination for empty-string keys and null values.
+    * Remove deprecated reflection calls and provide realistic user fixtures in action tests.
+    * Add management rendering and iterator regression tests for Moodle 5.3/PHP 8.5.
+
 * **1.1.0 (2026082700)**
     - Added Elevenlabs AI provider
 * **1.0.6 (2026081100)**

@@ -49,7 +49,6 @@ class provider_test extends \base_testcase
     private function call_merge_system_messages(array $messages): array
     {
         $method = new ReflectionMethod(provider::class, 'merge_system_messages');
-        $method->setAccessible(true);
 
         return $method->invoke($this->provider, $messages);
     }

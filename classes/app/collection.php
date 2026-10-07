@@ -448,7 +448,7 @@ class collection implements \Iterator, \Countable, \ArrayAccess
      */
     public function valid(): bool
     {
-        return array_key_exists(key($this->items), $this->items);
+        return key($this->items) !== null;
     }
 
     /**
