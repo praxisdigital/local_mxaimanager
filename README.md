@@ -108,6 +108,40 @@ die();
 
 ```
 
+### Tool calling and agents (POC)
+
+Providers that implement `interfaces\tool_calling` (OpenAI and OpenAI-compatible gateways such as Scaleway,
+Mistral and Nebius) can call functions. Tool calling uses the provider's chat model, so a feature's
+existing `chat_completion` configuration applies; no extra action has to be registered.
+
+```php
+$handler = $base_factory->ai()->feature()->handler($feature);
+
+if ($handler->supports_tool_calling()) {
+    // One call with tools: returns text and/or tool calls.
+    $request = $handler->chat_completion_with_tools($messages, [
+        new \local_mxaimanager\app\ai\provider\tool('replace_text', 'Replace exact text', $json_schema),
+    ]);
+    foreach ($request->get_tool_calls() as $call) {
+        $call->get_name();      // 'replace_text'
+        $call->get_arguments(); // decoded arguments
+    }
+
+    // Or a small agent loop: tools implement agent\tool_executor.
+    $result = $handler->run_agent($messages, $executors, $review = null, $max_steps = 6);
+    $result->get_text();        // last text from the model
+    $result->get_stop_reason(); // final_answer | tools_done | max_steps
+    $result->get_tool_log();    // every call, its arguments and outcome
+}
+```
+
+The loop is built for latency. Each step is one model call, and every call is written to the usage log.
+A tool returns `tool_result::done()` when the model does not need to see the result, for example a
+successful edit; `tool_result::info()` for data the model asked for; or `tool_result::error()`. When every
+call in a step is `done()` and the optional `$review` callback returns null, the loop stops at once, without
+a "confirm" round trip. A clean set of edits therefore costs one model call. Errors, `info()` results and
+review feedback give the model another step.
+
 ## Providers
 
 Configure provider instances under the plugin manage providers UI. Built-in types: OpenAI, Mistral, Nebius, Ollama, ElevenLabs.
@@ -225,6 +259,9 @@ None
 
 ## Change log
 
+* **1.2.0 (2026101400)** (POC branch)
+    - Added tool calling (`interfaces\tool_calling`) for OpenAI, OpenAI-compatible, Mistral and Nebius providers
+    - Added a small agent loop (`handler::run_agent()`) that stops as soon as the tool calls succeed
 * **1.1.0 (2026082700)**
     - Added Elevenlabs AI provider
 * **1.0.6 (2026081100)**

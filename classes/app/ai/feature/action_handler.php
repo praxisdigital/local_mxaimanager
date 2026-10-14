@@ -14,6 +14,8 @@ use local_mxaimanager\app\ai\provider\providers\interfaces\create_audio;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_embedding;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_image;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_transcription;
+use local_mxaimanager\app\ai\provider\providers\interfaces\tool_calling;
+use local_mxaimanager\app\ai\provider\tool_completion_request;
 use local_mxaimanager\app\ai\provider\transcription;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_configuration;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_response;
@@ -109,6 +111,51 @@ class action_handler
         // Return the response, stripping any markdown code block wrapper for JSON requests.
         $response = $chat_completion_request->get_response();
         return $is_json_request ? $this->strip_markdown_json_wrapper($response) : $response;
+    }
+
+    /**
+     * Whether the given provider instance supports function calling.
+     */
+    public function supports_tool_calling(int $provider_id, array $config_json): bool
+    {
+        try {
+            return $this->get_provider_handler_provider_and_settings_json($provider_id, $config_json) instanceof tool_calling;
+        } catch (\Throwable $t) {
+            return false;
+        }
+    }
+
+    /**
+     * One chat completion with tools, logged like any other chat completion.
+     *
+     * @param entity $feature
+     * @param message[] $messages
+     * @param \local_mxaimanager\app\ai\provider\tool[] $tools
+     * @param string $tool_choice
+     * @param int $provider_id
+     * @param array $config_json
+     * @return tool_completion_request
+     * @throws invalid_provider_instance_configuration
+     * @throws invalid_provider_instance_response
+     */
+    public function chat_completion_with_tools(
+        entity $feature,
+        array $messages,
+        array $tools,
+        string $tool_choice,
+        int $provider_id,
+        array $config_json
+    ): tool_completion_request {
+        $handler = $this->get_provider_handler_provider_and_settings_json($provider_id, $config_json);
+        if (!($handler instanceof tool_calling)) {
+            throw new invalid_provider_instance_configuration(
+                'Provider instance ID: ' . $provider_id . ' does not support tool calling'
+            );
+        }
+
+        $request = $handler->chat_completion_with_tools($messages, $tools, $tool_choice);
+        $this->log_usage($feature, $request);
+        return $request;
     }
 
     /**

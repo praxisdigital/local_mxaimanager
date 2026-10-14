@@ -20,8 +20,10 @@ use local_mxaimanager\app\factory as base_factory;
 
 class openai extends provider implements interfaces\chat_completion, interfaces\create_embedding,
                                          interfaces\create_image, interfaces\create_transcription,
-                                         interfaces\create_audio
+                                         interfaces\create_audio, interfaces\tool_calling
 {
+    use openai_compatible_tools;
+
     private const TTS_ALLOWED_VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
     private const TTS_ALLOWED_FORMATS = ['mp3', 'opus', 'aac', 'flac', 'wav', 'pcm'];
     private const TTS_DEFAULT_VOICE = 'alloy';

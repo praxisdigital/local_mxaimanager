@@ -14,8 +14,11 @@ use local_mxaimanager\app\exceptions\invalid_provider_instance_configuration;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_response;
 use local_mxaimanager\app\factory as base_factory;
 
-class nebius extends provider implements interfaces\chat_completion, interfaces\create_embedding
+class nebius extends provider implements interfaces\chat_completion, interfaces\create_embedding,
+                                         interfaces\tool_calling
 {
+    use openai_compatible_tools;
+
     private \curl $curl;
     private string $base_url;
     private string $api_key;

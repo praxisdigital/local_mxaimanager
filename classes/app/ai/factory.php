@@ -31,4 +31,12 @@ class factory
     {
         return new feature\factory($this->base_factory);
     }
+
+    /**
+     * @param callable $complete fn(array $messages, array $tools): \local_mxaimanager\app\ai\provider\tool_completion_request
+     */
+    public function agent(callable $complete, int $max_steps = agent\agent::DEFAULT_MAX_STEPS): agent\agent
+    {
+        return new agent\agent($complete, $max_steps);
+    }
 }

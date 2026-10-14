@@ -17,8 +17,15 @@ use local_mxaimanager\app\exceptions\invalid_provider_instance_response;
 use local_mxaimanager\app\factory as base_factory;
 
 class mistral extends provider implements interfaces\chat_completion, interfaces\create_embedding,
-                                          interfaces\create_transcription
+                                          interfaces\create_transcription, interfaces\tool_calling
 {
+    use openai_compatible_tools;
+
+    protected function tool_result_includes_name(): bool
+    {
+        return true;
+    }
+
     private \curl $curl;
     private string $base_url;
     private string $api_key;
