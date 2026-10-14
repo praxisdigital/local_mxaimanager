@@ -265,6 +265,8 @@ None
     - Added a small agent loop (`handler::run_agent()`) that stops as soon as the tool calls succeed
     - Added `tool_choice` to the agent loop (e.g. 'required'); Mistral receives it as 'any'
     - Fixed: chat completion failed with reasoning models (e.g. zai-glm-5-3 on Mistral) whose reply content is a list of chunks
+    - Added a "Reasoning effort" setting (Mistral: low/high/max, OpenAI: minimal/low/medium/high) on provider instances and per feature; only sent when set. zai-glm-5-3 on Mistral otherwise thinks at maximum: a small page took 208 s by default and 3.4 s on low
+    - An empty per-feature setting now falls back to the provider's value instead of blanking it
 * **1.1.0 (2026082700)**
     - Added Elevenlabs AI provider
 * **1.0.6 (2026081100)**

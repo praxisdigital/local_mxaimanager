@@ -116,3 +116,6 @@ $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:output_tok
 $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:session_id'] = 'The session ID associated with the request.';
 $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:user_id'] = 'The ID of the user who made the request.';
 $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:timecreated'] = 'The timestamp when the log entry was created.';
+$string['reasoning_effort'] = 'Reasoning effort';
+$string['reasoning_effort_default'] = 'Model default (not sent)';
+$string['reasoning_effort_help'] = 'How long a reasoning model thinks before it answers. Lower is much faster and cheaper; higher can help with hard tasks. Only sent when set; not every model accepts every level.';

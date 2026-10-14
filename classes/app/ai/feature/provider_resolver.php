@@ -114,7 +114,9 @@ class provider_resolver
                 JSON_THROW_ON_ERROR
             );
 
-            $config_json = array_merge($provider_config_json, $settings_json ?? []);
+            // An empty feature-level value means "use the provider's setting", not "blank it out".
+            $overrides = array_filter($settings_json ?? [], fn($value) => $value !== '' && $value !== null);
+            $config_json = array_merge($provider_config_json, $overrides);
 
             return [$provider_id, $config_json];
         } catch (\Throwable $t) {

@@ -116,3 +116,6 @@ $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:output_tok
 $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:session_id'] = 'Brugersessions ID forbundet med forespørgslen.';
 $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:user_id'] = 'Brugers ID, der foretog forespørgslen.';
 $string['privacy:metadata:local_mxaimanager_feature_action_usage_logs:timecreated'] = 'Tidsstempel for, hvornår logposten blev oprettet.';
+$string['reasoning_effort'] = 'Ræsonneringsindsats';
+$string['reasoning_effort_default'] = 'Modellens standard (sendes ikke)';
+$string['reasoning_effort_help'] = 'Hvor længe en ræsonnerende model tænker, før den svarer. Lavere er meget hurtigere og billigere; højere kan hjælpe ved svære opgaver. Sendes kun, når det er valgt; ikke alle modeller accepterer alle niveauer.';

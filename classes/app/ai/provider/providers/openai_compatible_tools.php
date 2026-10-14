@@ -67,7 +67,7 @@ trait openai_compatible_tools
         $payload = [
             'model' => $this->chat_model,
             'messages' => $this->serialize_tool_conversation($this->merge_system_messages($messages)),
-        ];
+        ] + (method_exists($this, 'chat_payload_extras') ? $this->chat_payload_extras() : []);
         if (!empty($tools)) {
             $payload['tools'] = array_values($tools);
             $payload['tool_choice'] = $this->map_tool_choice($tool_choice);

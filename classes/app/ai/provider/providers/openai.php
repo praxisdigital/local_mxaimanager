@@ -33,6 +33,7 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
     private string $base_url;
     private string $api_key;
     private string $chat_model;
+    private string $reasoning_effort;
     private string $embedding_model;
     private string $image_model;
     private string $transcription_model;
@@ -49,6 +50,7 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
         $this->base_url = $json_config['base_url'] ?? '';
         $this->api_key = $json_config['api_key'] ?? '';
         $this->chat_model = $json_config['chat_model'] ?? '';
+        $this->reasoning_effort = $json_config['reasoning_effort'] ?? '';
         $this->embedding_model = $json_config['embedding_model'] ?? '';
         $this->image_model = $json_config['image_model'] ?? '';
         $this->transcription_model = $json_config['transcription_model'] ?? '';
@@ -79,6 +81,34 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
         );
         $mform->setType("{$element_name_prefix}chat_model", PARAM_TEXT);
         $mform->addHelpButton("{$element_name_prefix}chat_model", 'openai_chat_model', 'local_mxaimanager');
+    }
+
+    /** Reasoning effort levels this API accepts ('' = do not send, the model's default). */
+    private const REASONING_EFFORTS = ['minimal', 'low', 'medium', 'high'];
+
+    private static function add_reasoning_effort_field(\MoodleQuickForm $mform, string $element_name_prefix): void
+    {
+        $options = ['' => get_string('reasoning_effort_default', 'local_mxaimanager')]
+            + array_combine(self::REASONING_EFFORTS, self::REASONING_EFFORTS);
+        $mform->addElement(
+            'select',
+            "{$element_name_prefix}reasoning_effort",
+            get_string('reasoning_effort', 'local_mxaimanager'),
+            $options,
+            [
+                'action' => interfaces\chat_completion::class
+            ]
+        );
+        $mform->setDefault("{$element_name_prefix}reasoning_effort", '');
+        $mform->addHelpButton("{$element_name_prefix}reasoning_effort", 'reasoning_effort', 'local_mxaimanager');
+    }
+
+    /**
+     * Payload fields shared by every chat request (reasoning effort, when configured).
+     */
+    protected function chat_payload_extras(): array
+    {
+        return $this->reasoning_effort !== '' ? ['reasoning_effort' => $this->reasoning_effort] : [];
     }
 
     private static function add_embedding_model_field(\MoodleQuickForm $mform, string $element_name_prefix): void
@@ -187,6 +217,7 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
 
         // Add chat model field
         self::add_chat_model_field($mform, $element_name_prefix);
+        self::add_reasoning_effort_field($mform, $element_name_prefix);
 
         // Add embedding model field
         self::add_embedding_model_field($mform, $element_name_prefix);
@@ -246,6 +277,7 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
         switch ($interface) {
             case interfaces\chat_completion::class:
                 self::add_chat_model_field($mform, $element_name_prefix);
+                self::add_reasoning_effort_field($mform, $element_name_prefix);
                 break;
             case interfaces\create_embedding::class:
                 self::add_embedding_model_field($mform, $element_name_prefix);
@@ -283,7 +315,7 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
         $payload = [
             'model' => $this->chat_model,
             'messages' => $messages,
-        ];
+        ] + $this->chat_payload_extras();
 
         if ($json_schema !== null) {
             $payload['response_format'] = [

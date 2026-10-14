@@ -150,6 +150,29 @@ class openai_compatible_tools_test extends \base_testcase
         }
     }
 
+    public function test_reasoning_effort_is_sent_only_when_configured(): void
+    {
+        $sent = [];
+        $this->mock_curl->method('post')->willReturnCallback(function ($url, $body) use (&$sent) {
+            $sent[] = json_decode($body, true);
+            return json_encode([
+                'choices' => [['message' => ['content' => 'ok'], 'finish_reason' => 'stop']],
+                'usage' => ['prompt_tokens' => 1, 'completion_tokens' => 1],
+            ]);
+        });
+        $config = ['base_url' => 'https://example.test', 'api_key' => 'key', 'chat_model' => 'm'];
+
+        (new mistral($this->mock_base_factory, $config + ['reasoning_effort' => 'low']))
+            ->chat_completion([new message('user', 'hi')]);
+        (new mistral($this->mock_base_factory, $config + ['reasoning_effort' => 'low']))
+            ->chat_completion_with_tools([new message('user', 'hi')], []);
+        (new openai($this->mock_base_factory, $config))->chat_completion([new message('user', 'hi')]);
+
+        $this->assertSame('low', $sent[0]['reasoning_effort']);
+        $this->assertSame('low', $sent[1]['reasoning_effort']);
+        $this->assertArrayNotHasKey('reasoning_effort', $sent[2]);
+    }
+
     public function test_bad_response_throws(): void
     {
         $this->mock_curl->method('post')->willReturn('{"error":"nope"}');
