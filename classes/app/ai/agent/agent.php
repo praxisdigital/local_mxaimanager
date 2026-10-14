@@ -30,14 +30,18 @@ class agent
     /** @var callable(message[], \local_mxaimanager\app\ai\provider\tool[]): tool_completion_request */
     protected $complete;
     protected int $max_steps;
+    protected string $tool_choice;
 
     /**
-     * @param callable $complete Makes one model call: fn(array $messages, array $tools): tool_completion_request.
+     * @param callable $complete Makes one model call: fn(array $messages, array $tools, string $tool_choice): tool_completion_request.
+     * @param int $max_steps
+     * @param string $tool_choice 'auto', or 'required' when every step must call a tool (e.g. ask or act, never chat).
      */
-    public function __construct(callable $complete, int $max_steps = self::DEFAULT_MAX_STEPS)
+    public function __construct(callable $complete, int $max_steps = self::DEFAULT_MAX_STEPS, string $tool_choice = 'auto')
     {
         $this->complete = $complete;
         $this->max_steps = max(1, $max_steps);
+        $this->tool_choice = $tool_choice;
     }
 
     /**
@@ -59,7 +63,7 @@ class agent
         $output_tokens = 0;
 
         for ($step = 1; $step <= $this->max_steps; $step++) {
-            $request = ($this->complete)($messages, $tools);
+            $request = ($this->complete)($messages, $tools, $this->tool_choice);
             $input_tokens += $request->get_input_tokens();
             $output_tokens += $request->get_output_tokens();
             if (trim($request->get_response()) !== '') {

@@ -32,6 +32,14 @@ trait openai_compatible_tools
     }
 
     /**
+     * The provider's spelling of a tool_choice value.
+     */
+    protected function map_tool_choice(string $tool_choice): string
+    {
+        return $tool_choice;
+    }
+
+    /**
      * Label used in error messages.
      */
     protected function tool_provider_label(): string
@@ -62,7 +70,7 @@ trait openai_compatible_tools
         ];
         if (!empty($tools)) {
             $payload['tools'] = array_values($tools);
-            $payload['tool_choice'] = $tool_choice;
+            $payload['tool_choice'] = $this->map_tool_choice($tool_choice);
         }
 
         $label = $this->tool_provider_label();

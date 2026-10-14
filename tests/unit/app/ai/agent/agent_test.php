@@ -140,6 +140,19 @@ class agent_test extends \base_testcase
         $this->assertSame('You broke something.', end($seen[1])->get_content());
     }
 
+    public function test_tool_choice_is_passed_to_the_model(): void
+    {
+        $choices = [];
+        $agent = new agent(function (array $messages, array $tools, string $choice) use (&$choices) {
+            $choices[] = $choice;
+            return new tool_completion_request([], [], 'ok', 1, 1, 'stop', []);
+        }, 2, 'required');
+
+        $agent->run([new message('user', 'go')], []);
+
+        $this->assertSame(['required'], $choices);
+    }
+
     public function test_unknown_tool_and_max_steps(): void
     {
         $seen = [];

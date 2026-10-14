@@ -121,12 +121,33 @@ class openai_compatible_tools_test extends \base_testcase
             ]);
         });
 
-        $request = $this->provider(mistral::class)->chat_completion_with_tools($this->conversation(), []);
+        $tools = [new tool('replace_text', 'Replace', ['type' => 'object'])];
+        $request = $this->provider(mistral::class)->chat_completion_with_tools($this->conversation(), $tools, 'required');
 
+        $this->assertSame('any', $sent['tool_choice']);
         $this->assertSame('replace_text', $sent['messages'][3]['name']);
-        $this->assertArrayNotHasKey('tools', $sent);
         $this->assertSame('Done.', $request->get_response());
         $this->assertSame([], $request->get_tool_calls());
+    }
+
+    public function test_plain_chat_completion_flattens_chunked_content(): void
+    {
+        $this->mock_curl->method('post')->willReturn(json_encode([
+            'choices' => [[
+                'message' => ['content' => [
+                    ['type' => 'thinking', 'thinking' => [['type' => 'text', 'text' => 'hmm']]],
+                    ['type' => 'text', 'text' => 'Hello'],
+                    ['type' => 'text', 'text' => ' world'],
+                ]],
+                'finish_reason' => 'stop',
+            ]],
+            'usage' => ['prompt_tokens' => 1, 'completion_tokens' => 2],
+        ]));
+
+        foreach ([mistral::class, openai::class, nebius::class] as $classname) {
+            $request = $this->provider($classname)->chat_completion([new message('user', 'hi')]);
+            $this->assertSame('Hello world', $request->get_response(), $classname);
+        }
     }
 
     public function test_bad_response_throws(): void

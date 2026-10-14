@@ -116,6 +116,7 @@ class handler
      * @param tool_executor[] $executors
      * @param callable|null $review fn(): ?string, see agent::run().
      * @param int $max_steps
+     * @param string $tool_choice 'auto', or 'required' to force a tool call on every step.
      * @return agent_result
      * @throws invalid_provider_instance_configuration
      * @throws invalid_provider_instance_response
@@ -125,11 +126,13 @@ class handler
         array $messages,
         array $executors,
         ?callable $review = null,
-        int $max_steps = \local_mxaimanager\app\ai\agent\agent::DEFAULT_MAX_STEPS
+        int $max_steps = \local_mxaimanager\app\ai\agent\agent::DEFAULT_MAX_STEPS,
+        string $tool_choice = 'auto'
     ): agent_result {
         $agent = $this->base_factory->ai()->agent(
-            fn(array $messages, array $tools) => $this->chat_completion_with_tools($messages, $tools),
-            $max_steps
+            fn(array $messages, array $tools, string $choice) => $this->chat_completion_with_tools($messages, $tools, $choice),
+            $max_steps,
+            $tool_choice
         );
         return $agent->run($messages, $executors, $review);
     }

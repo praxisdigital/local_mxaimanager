@@ -314,7 +314,8 @@ class openai extends provider implements interfaces\chat_completion, interfaces\
             return new chat_completion_request(
                 $payload,
                 $json,
-                $json['choices'][0]['message']['content'],
+                // Reasoning models return a list of chunks (thinking + text), not a string.
+                $this->content_to_text($json['choices'][0]['message']['content']),
                 $json['usage']['prompt_tokens'],
                 $json['usage']['completion_tokens'],
                 $json['choices'][0]['finish_reason'] ?? 'stop'

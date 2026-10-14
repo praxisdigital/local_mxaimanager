@@ -35,8 +35,11 @@ class factory
     /**
      * @param callable $complete fn(array $messages, array $tools): \local_mxaimanager\app\ai\provider\tool_completion_request
      */
-    public function agent(callable $complete, int $max_steps = agent\agent::DEFAULT_MAX_STEPS): agent\agent
-    {
-        return new agent\agent($complete, $max_steps);
+    public function agent(
+        callable $complete,
+        int $max_steps = agent\agent::DEFAULT_MAX_STEPS,
+        string $tool_choice = 'auto'
+    ): agent\agent {
+        return new agent\agent($complete, $max_steps, $tool_choice);
     }
 }

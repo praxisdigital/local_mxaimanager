@@ -128,7 +128,7 @@ if ($handler->supports_tool_calling()) {
     }
 
     // Or a small agent loop: tools implement agent\tool_executor.
-    $result = $handler->run_agent($messages, $executors, $review = null, $max_steps = 6);
+    $result = $handler->run_agent($messages, $executors, $review = null, $max_steps = 6, $tool_choice = 'auto');
     $result->get_text();        // last text from the model
     $result->get_stop_reason(); // final_answer | tools_done | max_steps
     $result->get_tool_log();    // every call, its arguments and outcome
@@ -140,7 +140,8 @@ A tool returns `tool_result::done()` when the model does not need to see the res
 successful edit; `tool_result::info()` for data the model asked for; or `tool_result::error()`. When every
 call in a step is `done()` and the optional `$review` callback returns null, the loop stops at once, without
 a "confirm" round trip. A clean set of edits therefore costs one model call. Errors, `info()` results and
-review feedback give the model another step.
+review feedback give the model another step. Pass `$tool_choice = 'required'` when every step must call a
+tool, for example an interviewer that must either ask (a question tool) or act, and never just chat.
 
 ## Providers
 
@@ -262,6 +263,8 @@ None
 * **1.2.0 (2026101400)** (POC branch)
     - Added tool calling (`interfaces\tool_calling`) for OpenAI, OpenAI-compatible, Mistral and Nebius providers
     - Added a small agent loop (`handler::run_agent()`) that stops as soon as the tool calls succeed
+    - Added `tool_choice` to the agent loop (e.g. 'required'); Mistral receives it as 'any'
+    - Fixed: chat completion failed with reasoning models (e.g. zai-glm-5-3 on Mistral) whose reply content is a list of chunks
 * **1.1.0 (2026082700)**
     - Added Elevenlabs AI provider
 * **1.0.6 (2026081100)**

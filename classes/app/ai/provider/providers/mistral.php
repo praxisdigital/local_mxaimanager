@@ -26,6 +26,12 @@ class mistral extends provider implements interfaces\chat_completion, interfaces
         return true;
     }
 
+    protected function map_tool_choice(string $tool_choice): string
+    {
+        // Mistral's long-standing name for "must call a tool".
+        return $tool_choice === 'required' ? 'any' : $tool_choice;
+    }
+
     private \curl $curl;
     private string $base_url;
     private string $api_key;
@@ -219,7 +225,8 @@ class mistral extends provider implements interfaces\chat_completion, interfaces
             return new chat_completion_request(
                 $payload,
                 $json,
-                $json['choices'][0]['message']['content'],
+                // Reasoning models return a list of chunks (thinking + text), not a string.
+                $this->content_to_text($json['choices'][0]['message']['content']),
                 $json['usage']['prompt_tokens'],
                 $json['usage']['completion_tokens'],
                 $json['choices'][0]['finish_reason'] ?? 'stop'
