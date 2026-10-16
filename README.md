@@ -225,6 +225,8 @@ None
 
 ## Change log
 
+* **1.1.1 (2026101600)**
+    - Fixed the Mistral provider failing on reasoning models (e.g. mistral-large-4, zai-glm-5-3), which return message content as a list of chunks instead of a string
 * **1.1.0 (2026082700)**
     - Added Elevenlabs AI provider
 * **1.0.6 (2026081100)**

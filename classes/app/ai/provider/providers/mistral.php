@@ -212,7 +212,8 @@ class mistral extends provider implements interfaces\chat_completion, interfaces
             return new chat_completion_request(
                 $payload,
                 $json,
-                $json['choices'][0]['message']['content'],
+                // Reasoning models return a list of chunks (thinking + text), not a string.
+                $this->content_to_text($json['choices'][0]['message']['content']),
                 $json['usage']['prompt_tokens'],
                 $json['usage']['completion_tokens'],
                 $json['choices'][0]['finish_reason'] ?? 'stop'
@@ -223,6 +224,28 @@ class mistral extends provider implements interfaces\chat_completion, interfaces
                 previous: $t
             );
         }
+    }
+
+    /**
+     * Flattens message content to its text. Reasoning models (e.g. mistral-large-4, zai-glm-5-3)
+     * return a list of chunks - a "thinking" chunk followed by "text" chunks - and only the
+     * text chunks are the answer.
+     */
+    protected function content_to_text(mixed $content): string
+    {
+        if (is_string($content)) {
+            return $content;
+        }
+        if (!is_array($content)) {
+            return '';
+        }
+        $text = '';
+        foreach ($content as $chunk) {
+            if (is_array($chunk) && ($chunk['type'] ?? '') === 'text') {
+                $text .= $chunk['text'] ?? '';
+            }
+        }
+        return $text;
     }
 
     /**
