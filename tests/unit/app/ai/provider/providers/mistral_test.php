@@ -142,6 +142,42 @@ class mistral_test extends \base_testcase
         $this->assertEquals('stop', $result->get_finish_reason());
     }
 
+    public function test_chat_completion_reasoning_model_content_chunks(): void
+    {
+        $json_config = [
+            'base_url' => 'https://api.mistral.ai',
+            'api_key' => 'test_key',
+            'chat_model' => 'mistral-large-4',
+        ];
+
+        $expected_response = json_encode([
+            'choices' => [[
+                'message' => [
+                    'content' => [
+                        ['type' => 'thinking', 'thinking' => [['type' => 'text', 'text' => 'Reasoning...']], 'closed' => true],
+                        ['type' => 'text', 'text' => '{"a":'],
+                        ['type' => 'text', 'text' => '1}'],
+                    ],
+                ],
+                'finish_reason' => 'stop',
+            ]],
+            'usage' => ['prompt_tokens' => 5, 'completion_tokens' => 5],
+        ]);
+
+        $this->mock_curl->expects($this->once())
+            ->method('post')
+            ->willReturn($expected_response);
+
+        $provider = new \local_mxaimanager\app\ai\provider\providers\mistral(
+            $this->mock_base_factory,
+            $json_config
+        );
+
+        $result = $provider->chat_completion([['role' => 'user', 'content' => 'Hello']], true);
+
+        $this->assertEquals('{"a":1}', $result->get_response());
+    }
+
     public function test_chat_completion_finish_reason_length(): void
     {
         $json_config = [
