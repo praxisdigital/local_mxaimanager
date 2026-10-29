@@ -225,6 +225,10 @@ None
 
 ## Change log
 
+See [CHANGELOG.md](CHANGELOG.md) for detailed technical changes.
+
+* **1.1.2 (2026102800)** — Avoid PHP 8.5 notices when collections are empty or exhausted; Moodle 5.0 requirements are unchanged.
+
 * **1.1.1 (2026101600)**
     - Fixed the Mistral provider failing on reasoning models (e.g. mistral-large-4, zai-glm-5-3), which return message content as a list of chunks instead of a string
 * **1.1.0 (2026082700)**
