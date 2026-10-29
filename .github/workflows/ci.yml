@@ -2,15 +2,9 @@ name: Moodle CI
 
 on:
   pull_request:
-    branches:
-      - main
-      - master
-      - MOODLE_*_STABLE
+    types: [ opened, reopened, synchronize ]
   push:
-    branches:
-      - main
-      - master
-      - MOODLE_*_STABLE
+    branches: [main, master, '*_STABLE', '*_LATEST']
   issue_comment:
     types: [created]
   workflow_dispatch:
