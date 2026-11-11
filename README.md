@@ -260,6 +260,7 @@ None
 
 * **1.1.2 (2026111100)**
     - Added a configurable Nebius chat output-token limit in provider settings and `$CFG->local_mxaimanager_preconfigured_providers`, defaulting to 32,000 tokens while retaining thinking.
+    - Secured provider deletion: login and configuration permissions are checked before deletion, and confirmation requires POST data with a valid session token.
 * **1.1.1 (2026101600)**
     - Fixed the Mistral provider failing on reasoning models (e.g. mistral-large-4, zai-glm-5-3), which return message content as a list of chunks instead of a string
 * **1.1.0 (2026082700)**

@@ -37,6 +37,15 @@ class delete implements named_templatable, renderable
             'providers' => true,
             'id' => $this->provider_id,
             'name' => $provider->get_name(),
+            'sesskey' => sesskey(),
+            'delete_url' => (new \moodle_url('/local/mxaimanager/view.php', [
+                'view' => 'manage_providers',
+                'action' => 'delete',
+            ]))->out(false),
+            'cancel_url' => (new \moodle_url('/local/mxaimanager/view.php', [
+                'view' => 'manage_providers',
+                'action' => 'browse',
+            ]))->out(false),
         ];
     }
 }

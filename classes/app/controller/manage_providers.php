@@ -250,13 +250,17 @@ class manage_providers implements interfaces\view
 
     public function delete(): string
     {
+        $this->page_setup();
+
         $provider_id = required_param('id', PARAM_INT);
         $this->url->param('id', $provider_id);
 
         $confirmed = optional_param('confirmed', 0, PARAM_INT);
         $this->url->param('confirmed', $confirmed);
 
-        if ($confirmed) {
+        if ($confirmed && data_submitted()) {
+            require_sesskey();
+
             $this->base_factory->ai()->provider()->repository()->delete($provider_id);
             $default_providers = $this->base_factory->ai()->default_provider()->repository()->get_all_by_provider_id(
                 $provider_id
@@ -267,10 +271,7 @@ class manage_providers implements interfaces\view
 
             $this->url->param('action', 'browse');
             redirect($this->url);
-            die();
         }
-
-        $this->page_setup();
 
         $output = $this->base_factory->output()->header();
         $output .= $this->base_factory->output()->render(
