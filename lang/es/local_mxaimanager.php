@@ -1,6 +1,9 @@
 <?php
 
 $string['pluginname'] = 'Moxis AI Manager';
+$string['nebius_max_tokens'] = 'Número máximo de tokens de salida';
+$string['nebius_max_tokens_help'] = 'Número máximo de tokens generados por respuesta de chat, incluidos el razonamiento interno y la respuesta final. El valor predeterminado es 32000. La facturación se basa en el uso real. Elija un entero positivo compatible con el modelo y deje espacio para la entrada dentro de su ventana de contexto.';
+$string['nebius_max_tokens_invalid'] = 'El número máximo de tokens de salida debe ser un entero positivo.';
 
 // Manage Providers
 $string['manage:info'] = "<p>Esta configuración te permite definir qué proveedores de IA (OpenAI, Mistral, etc.) están disponibles en tu sitio.</p><p>También podrás configurar:</p><ul><li>Qué instancia de proveedor se debe usar por defecto.</li><li>Qué modelo debe usar una instancia de proveedor por defecto.</li><li>Qué modelo y/o qué instancia de proveedor se debe usar para una función de IA específica en tu plugin de IA.</li></ul>";

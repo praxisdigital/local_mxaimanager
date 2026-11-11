@@ -1,6 +1,9 @@
 <?php
 
 $string['pluginname'] = 'Moxis AI Manager';
+$string['nebius_max_tokens'] = 'Tulostokenien enimmäismäärä';
+$string['nebius_max_tokens_help'] = 'Yhden chat-vastauksen tokenien enimmäismäärä, mukaan lukien sisäinen päättely ja lopullinen vastaus. Oletusarvo on 32000. Laskutus perustuu todelliseen käyttöön. Valitse mallin tukema positiivinen kokonaisluku ja jätä mallin konteksti-ikkunaan tilaa syötteelle.';
+$string['nebius_max_tokens_invalid'] = 'Tulostokenien enimmäismäärän on oltava positiivinen kokonaisluku.';
 
 // Manage Providers
 $string['manage:info'] = "<p>Näillä asetuksilla voit määrittää, mitkä tekoälypalveluntarjoajat (OpenAI, Mistral jne.) ovat käytettävissä sivustollasi.</p><p>Voit myös määrittää:</p><ul><li>Mitä palveluntarjoajan instanssia käytetään oletuksena.</li><li>Mitä mallia palveluntarjoajan instanssi käyttää oletuksena.</li><li>Mitä mallia ja/tai mitä palveluntarjoajan instanssia käytetään tietyssä tekoälyominaisuudessa AI-lisäosassasi.</li></ul>";

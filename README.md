@@ -166,6 +166,35 @@ Supports chat completion and embeddings only. Text-to-image support was removed.
 
 - Default base URL: `https://api.tokenfactory.nebius.com`
 - Required config: `base_url`, `api_key`, `chat_model`, `embedding_model`
+- Optional config: `max_tokens` (positive integer, default `32000`)
+
+Set **Maximum output tokens** on each Nebius provider instance in the manage providers UI,
+or add `max_tokens` alongside `chat_model` in its existing `config.php` entry:
+
+```php
+$CFG->local_mxaimanager_preconfigured_providers = [
+    [
+        'name' => 'Nebius',
+        'classname' => \local_mxaimanager\app\ai\provider\providers\nebius::class,
+        'base_url' => 'https://api.tokenfactory.nebius.com',
+        'api_key' => 'YOUR_API_KEY',
+        'chat_model' => 'Qwen/Qwen3.8-27B',
+        'embedding_model' => 'Qwen/Qwen3-Embedding-8B',
+        'max_tokens' => 32000,
+    ],
+];
+```
+
+Preserve any other existing provider entries and options. Preconfigured providers remain read-only
+in the UI; change their settings in `config.php`.
+
+The limit applies to every chat-completion request using that provider, including JSON responses
+and feature-specific chat models. It includes internal thinking and the final answer; thinking is
+not disabled. This is a ceiling, not a fixed token charge: billing depends on actual usage.
+Existing providers without `max_tokens` automatically use `32000`. Choose a value supported by
+the configured model, leaving room for input within its context window. Larger generations may
+increase latency and require longer HTTP/infrastructure timeouts. Embeddings and other providers
+are unaffected. This does not add text continuation or guarantee completion within the limit.
 
 Example models (see Nebius docs for current availability):
 
@@ -225,6 +254,8 @@ None
 
 ## Change log
 
+* **1.1.2 (2026111100)**
+    - Added a configurable Nebius chat output-token limit in provider settings and `$CFG->local_mxaimanager_preconfigured_providers`, defaulting to 32,000 tokens while retaining thinking.
 * **1.1.1 (2026101600)**
     - Fixed the Mistral provider failing on reasoning models (e.g. mistral-large-4, zai-glm-5-3), which return message content as a list of chunks instead of a string
 * **1.1.0 (2026082700)**

@@ -1,6 +1,9 @@
 <?php
 
 $string['pluginname'] = 'Moxis AI Manager';
+$string['nebius_max_tokens'] = 'Maksimalt antal outputtokens';
+$string['nebius_max_tokens_help'] = 'Maksimalt antal tokens pr. chatsvar, inklusive intern tænkning og det endelige svar. Standardværdien er 32000. Der afregnes efter det faktiske forbrug. Vælg et positivt heltal, som modellen understøtter, og sørg for, at der er plads til input i modellens kontekstvindue.';
+$string['nebius_max_tokens_invalid'] = 'Det maksimale antal outputtokens skal være et positivt heltal.';
 
 // Manage Providers
 $string['manage:info'] = "<p>Disse indstillinger gør det muligt for dig at definere, hvilke AI-providers (OpenAI, Mistral, osv.) der er tilgængelige på dit site.</p><p>Du vil også kunne konfigurere:</p><ul><li>Hvilken provider-instans der skal bruges som standard.</li><li>Hvilken model en provider-instans skal bruge som standard.</li><li>Hvilken model og/eller hvilken provider-instans der skal bruges til en specifik AI-funktion i dit AI-plugin.</li></ul>";
