@@ -10,11 +10,15 @@
                         {{#str}}manage_providers:delete_confirm, local_mxaimanager{{/str}}
                     </div>
                     <div class="modal-footer">
-                        <a href="/local/mxaimanager/view.php?view=manage_providers&action=delete&id={{id}}&confirmed=1"
-                        class="btn btn-danger">
-                        {{#str}}confirm, core{{/str}}
-                        </a>
-                        <a href="/local/mxaimanager/view.php?view=manage_providers&action=browse"
+                        <form method="post" action="{{delete_url}}">
+                            <input type="hidden" name="id" value="{{id}}">
+                            <input type="hidden" name="confirmed" value="1">
+                            <input type="hidden" name="sesskey" value="{{sesskey}}">
+                            <button type="submit" class="btn btn-danger">
+                                {{#str}}confirm, core{{/str}}
+                            </button>
+                        </form>
+                        <a href="{{cancel_url}}"
                            class="btn btn-secondary">
                             {{#str}}cancel, core{{/str}}
                         </a>

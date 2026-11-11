@@ -16,11 +16,14 @@ use local_mxaimanager\app\factory as base_factory;
 
 class nebius extends provider implements interfaces\chat_completion, interfaces\create_embedding
 {
+    private const DEFAULT_MAX_TOKENS = 32000;
+
     private \curl $curl;
     private string $base_url;
     private string $api_key;
     private string $chat_model;
     private string $embedding_model;
+    private int $max_tokens;
 
     /**
      * @throws invalid_provider_instance_configuration
@@ -36,6 +39,15 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
         if (empty($this->base_url) || empty($this->api_key)) {
             throw new invalid_provider_instance_configuration('Nebius is missing base url and/or api key');
         }
+
+        $max_tokens = $json_config['max_tokens'] ?? self::DEFAULT_MAX_TOKENS;
+        if ($max_tokens === '') {
+            $max_tokens = self::DEFAULT_MAX_TOKENS;
+        }
+        if (!self::is_valid_max_tokens($max_tokens)) {
+            throw new invalid_provider_instance_configuration(get_string('nebius_max_tokens_invalid', 'local_mxaimanager'));
+        }
+        $this->max_tokens = (int) $max_tokens;
 
         $this->curl = $this->base_factory->curl();
         $this->curl->setHeader([
@@ -72,6 +84,21 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
         $mform->addHelpButton("{$element_name_prefix}embedding_model", 'nebius_embedding_model', 'local_mxaimanager');
     }
 
+    private static function is_valid_max_tokens(mixed $value): bool
+    {
+        return (is_int($value) || is_string($value))
+            && filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
+    }
+
+    private static function add_max_tokens_field(\MoodleQuickForm $mform, string $element_name_prefix): void
+    {
+        $name = "{$element_name_prefix}max_tokens";
+        $mform->addElement('text', $name, get_string('nebius_max_tokens', 'local_mxaimanager'));
+        // Validate the original value instead of silently truncating decimals with PARAM_INT.
+        $mform->setType($name, PARAM_RAW_TRIMMED);
+        $mform->addHelpButton($name, 'nebius_max_tokens', 'local_mxaimanager');
+    }
+
     public static function moodleform_definition(\MoodleQuickForm $mform, string $element_name_prefix): void
     {
         // Add base_url field
@@ -86,6 +113,7 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
 
         // Add chat model field
         self::add_chat_model_field($mform, $element_name_prefix);
+        self::add_max_tokens_field($mform, $element_name_prefix);
 
         // Add embedding model field
         self::add_embedding_model_field($mform, $element_name_prefix);
@@ -109,6 +137,11 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
 
         if (empty($data["{$element_name_prefix}embedding_model"])) {
             $errors["{$element_name_prefix}embedding_model"] = get_string('required');
+        }
+
+        $max_tokens = $data["{$element_name_prefix}max_tokens"] ?? self::DEFAULT_MAX_TOKENS;
+        if ($max_tokens !== '' && !self::is_valid_max_tokens($max_tokens)) {
+            $errors["{$element_name_prefix}max_tokens"] = get_string('nebius_max_tokens_invalid', 'local_mxaimanager');
         }
 
         return $errors;
@@ -148,6 +181,7 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
         $payload = [
             'model' => $this->chat_model,
             'messages' => $messages,
+            'max_tokens' => $this->max_tokens,
         ];
 
         if ($json_schema !== null) {
