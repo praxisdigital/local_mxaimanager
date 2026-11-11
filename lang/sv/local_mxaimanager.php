@@ -2,7 +2,7 @@
 
 $string['pluginname'] = 'Moxis AI Manager';
 $string['nebius_max_tokens'] = 'Maximalt antal utdatatoken';
-$string['nebius_max_tokens_help'] = 'Maximalt antal token per chattsvar, inklusive internt tänkande och det slutliga svaret. Standardvärdet är 32000. Debiteringen baseras på faktisk användning. Välj ett positivt heltal som modellen stöder och lämna utrymme för indata i modellens kontextfönster.';
+$string['nebius_max_tokens_help'] = 'Maximalt antal token per chattsvar, inklusive internt tänkande och det slutliga svaret. Lämna tomt för att använda tilläggets standardvärde (för närvarande 32000) och följa framtida ändringar av standardvärdet. Ange ett positivt heltal för att åsidosätta standardvärdet. Debiteringen baseras på faktisk användning. Välj ett värde som modellen stöder och lämna utrymme för indata i modellens kontextfönster.';
 $string['nebius_max_tokens_invalid'] = 'Det maximala antalet utdatatoken måste vara ett positivt heltal.';
 
 // Manage Providers

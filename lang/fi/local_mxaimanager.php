@@ -2,7 +2,7 @@
 
 $string['pluginname'] = 'Moxis AI Manager';
 $string['nebius_max_tokens'] = 'Tulostokenien enimmäismäärä';
-$string['nebius_max_tokens_help'] = 'Yhden chat-vastauksen tokenien enimmäismäärä, mukaan lukien sisäinen päättely ja lopullinen vastaus. Oletusarvo on 32000. Laskutus perustuu todelliseen käyttöön. Valitse mallin tukema positiivinen kokonaisluku ja jätä mallin konteksti-ikkunaan tilaa syötteelle.';
+$string['nebius_max_tokens_help'] = 'Yhden chat-vastauksen tokenien enimmäismäärä, mukaan lukien sisäinen päättely ja lopullinen vastaus. Jätä tyhjäksi käyttääksesi lisäosan oletusarvoa (tällä hetkellä 32000) ja seurataksesi oletusarvon tulevia muutoksia. Anna positiivinen kokonaisluku ohittaaksesi oletusarvon. Laskutus perustuu todelliseen käyttöön. Valitse mallin tukema arvo ja jätä mallin konteksti-ikkunaan tilaa syötteelle.';
 $string['nebius_max_tokens_invalid'] = 'Tulostokenien enimmäismäärän on oltava positiivinen kokonaisluku.';
 
 // Manage Providers

@@ -504,7 +504,7 @@ class nebius_test extends \base_testcase
         // Expectations for all the element additions
         $mform->expects($this->exactly(5))->method('addElement');
         $mform->expects($this->exactly(5))->method('setType');
-        $mform->expects($this->exactly(3))->method('setDefault');
+        $mform->expects($this->exactly(2))->method('setDefault');
 
         $element_name_prefix = 'test_';
 

@@ -2,7 +2,7 @@
 
 $string['pluginname'] = 'Moxis AI Manager';
 $string['nebius_max_tokens'] = 'Nombre màxim de tokens de sortida';
-$string['nebius_max_tokens_help'] = 'Nombre màxim de tokens generats per resposta de xat, inclosos el raonament intern i la resposta final. El valor per defecte és 32000. La facturació es basa en l’ús real. Trieu un enter positiu compatible amb el model i deixeu espai per a l’entrada dins de la seva finestra de context.';
+$string['nebius_max_tokens_help'] = 'Nombre màxim de tokens generats per resposta de xat, inclosos el raonament intern i la resposta final. Deixeu el camp buit per utilitzar el valor per defecte del connector (actualment 32000) i seguir els canvis futurs del valor per defecte. Introduïu un enter positiu per substituir-lo. La facturació es basa en l’ús real. Trieu un valor compatible amb el model i deixeu espai per a l’entrada dins de la seva finestra de context.';
 $string['nebius_max_tokens_invalid'] = 'El nombre màxim de tokens de sortida ha de ser un enter positiu.';
 
 // Manage Providers

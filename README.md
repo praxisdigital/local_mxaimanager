@@ -166,7 +166,7 @@ Supports chat completion and embeddings only. Text-to-image support was removed.
 
 - Default base URL: `https://api.tokenfactory.nebius.com`
 - Required config: `base_url`, `api_key`, `chat_model`, `embedding_model`
-- Optional config: `max_tokens` (positive integer, default `32000`)
+- Optional config: `max_tokens` (positive integer override; omitted, null or empty uses the current plugin default, currently `32000`)
 
 Set **Maximum output tokens** on each Nebius provider instance in the manage providers UI,
 or add `max_tokens` alongside `chat_model` in its existing `config.php` entry:
@@ -191,7 +191,11 @@ in the UI; change their settings in `config.php`.
 The limit applies to every chat-completion request using that provider, including JSON responses
 and feature-specific chat models. It includes internal thinking and the final answer; thinking is
 not disabled. This is a ceiling, not a fixed token charge: billing depends on actual usage.
-Existing providers without `max_tokens` automatically use `32000`. Choose a value supported by
+The UI field is empty by default. Leave it empty (or clear an existing value) to inherit the current
+plugin default at runtime, including future default changes. Saving an empty field does not pin
+the provider to a numeric limit. In `config.php`, omit `max_tokens` or use `null` or an empty string
+to inherit the default. An explicit number remains fixed until changed or cleared.
+Existing providers without `max_tokens` automatically inherit the default. Choose a value supported by
 the configured model, leaving room for input within its context window. Larger generations may
 increase latency and require longer HTTP/infrastructure timeouts. Embeddings and other providers
 are unaffected. This does not add text continuation or guarantee completion within the limit.

@@ -41,6 +41,9 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
         }
 
         $max_tokens = $json_config['max_tokens'] ?? self::DEFAULT_MAX_TOKENS;
+        if ($max_tokens === '') {
+            $max_tokens = self::DEFAULT_MAX_TOKENS;
+        }
         if (!self::is_valid_max_tokens($max_tokens)) {
             throw new invalid_provider_instance_configuration(get_string('nebius_max_tokens_invalid', 'local_mxaimanager'));
         }
@@ -93,7 +96,6 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
         $mform->addElement('text', $name, get_string('nebius_max_tokens', 'local_mxaimanager'));
         // Validate the original value instead of silently truncating decimals with PARAM_INT.
         $mform->setType($name, PARAM_RAW_TRIMMED);
-        $mform->setDefault($name, self::DEFAULT_MAX_TOKENS);
         $mform->addHelpButton($name, 'nebius_max_tokens', 'local_mxaimanager');
     }
 
@@ -138,7 +140,7 @@ class nebius extends provider implements interfaces\chat_completion, interfaces\
         }
 
         $max_tokens = $data["{$element_name_prefix}max_tokens"] ?? self::DEFAULT_MAX_TOKENS;
-        if (!self::is_valid_max_tokens($max_tokens)) {
+        if ($max_tokens !== '' && !self::is_valid_max_tokens($max_tokens)) {
             $errors["{$element_name_prefix}max_tokens"] = get_string('nebius_max_tokens_invalid', 'local_mxaimanager');
         }
 

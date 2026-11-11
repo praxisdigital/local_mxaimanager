@@ -26,6 +26,7 @@ class nebius_max_tokens_test extends \base_testcase
         return [
             'omitted' => [[], 32000],
             'null uses default' => [['max_tokens' => null], 32000],
+            'blank inherits default' => [['max_tokens' => ''], 32000],
             'custom integer' => [['max_tokens' => 64000], 64000],
             'form string' => [['max_tokens' => '16000'], 16000],
             'minimum' => [['max_tokens' => 1], 1],
@@ -73,7 +74,6 @@ class nebius_max_tokens_test extends \base_testcase
         return [
             'zero' => [0],
             'negative' => [-1],
-            'empty' => [''],
             'fraction' => [1.5],
             'fraction string' => ['1.5'],
             'float integer' => [32000.0],
@@ -122,7 +122,7 @@ class nebius_max_tokens_test extends \base_testcase
         return $data;
     }
 
-    public function test_provider_form_exposes_limit_and_default(): void
+    public function test_provider_form_leaves_limit_empty_to_inherit_default(): void
     {
         $form = new \MoodleQuickForm('nebius_config', 'post', '');
         nebius::moodleform_definition($form, 'nebius_');
@@ -131,7 +131,7 @@ class nebius_max_tokens_test extends \base_testcase
         $this->assertSame('text', $field->getType());
         $this->assertSame(get_string('nebius_max_tokens', 'local_mxaimanager'), $field->getLabel());
         $this->assertSame(PARAM_RAW_TRIMMED, $form->getCleanType('nebius_max_tokens', '32000'));
-        $this->assertEquals(32000, $form->getElementValue('nebius_max_tokens'));
+        $this->assertNull($form->getElementValue('nebius_max_tokens'));
     }
 
     public function test_embedding_payload_does_not_include_limit(): void

@@ -23,6 +23,8 @@ class nebius_configuration_test extends \advanced_testcase
             'database provider' => [false, ['max_tokens' => '16000'], 16000],
             'existing config.php provider' => [true, [], 32000],
             'existing database provider' => [false, [], 32000],
+            'blank config.php limit' => [true, ['max_tokens' => ''], 32000],
+            'cleared database limit' => [false, ['max_tokens' => ''], 32000],
         ];
     }
 
