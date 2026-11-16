@@ -258,6 +258,9 @@ None
 
 ## Change log
 
+See [CHANGELOG.md](CHANGELOG.md) for detailed technical changes.
+
+* **1.1.3 (2026111600)** — Avoid PHP 8.5 notices when collections are empty or exhausted; Moodle 5.0 requirements are unchanged.
 * **1.1.2 (2026111100)**
     - Added a configurable Nebius chat output-token limit in provider settings and `$CFG->local_mxaimanager_preconfigured_providers`, defaulting to 32,000 tokens while retaining thinking.
     - Secured provider deletion: login and configuration permissions are checked before deletion, and confirmation requires POST data with a valid session token.
