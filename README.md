@@ -108,6 +108,26 @@ die();
 
 ```
 
+### Tool-capable chat
+
+`$feature_handler->complete(new tool_chat_request($messages, $tools, $binding))` uses the configured chat
+provider without changing the existing `chat_completion` API. Tools are flat definitions:
+`['name' => 'lookup', 'description' => '...', 'parameters' => $jsonschema]`. Messages are
+arrays with `role` and `content`; assistant tool calls use `tool_calls` entries with `id`,
+`name` and object-valued `arguments`. A tool result has role `tool`, its `tool_call_id`,
+`name` and `content`.
+
+A successful `tool_chat_turn` exposes `text`, `calls` (in the same canonical call format),
+an opaque `binding`, finish reason and token counts. Both types are in
+`local_mxaimanager\app\ai\provider`. Pass the binding back on every later turn of that tool
+conversation. A changed or unavailable provider or effective configuration raises an error
+rather than switching providers. `complete` returns a `tool_chat_turn` or throws: an absent
+adapter raises `invalid_provider_instance_configuration`, and an explicit provider rejection
+of tool support raises `unsupported_tool_completion` (a subclass of
+`invalid_provider_instance_response`). Other provider errors also raise exceptions. Rejections
+are not cached. Tool turns are
+logged like ordinary chat calls; truncated responses are errors and are not continued.
+
 ## Providers
 
 Configure provider instances under the plugin manage providers UI. Built-in types: OpenAI, Mistral, Nebius, Ollama, ElevenLabs.

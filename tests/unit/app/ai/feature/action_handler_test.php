@@ -39,6 +39,104 @@ class MockHandlerWithoutInterface
 
 class action_handler_test extends base_testcase
 {
+    public function test_tool_binding_mismatch_fails_before_fallback(): void
+    {
+        $factory = $this->createMock(base_factory::class);
+        $handler = $this->getMockBuilder(action_handler::class)
+            ->setConstructorArgs([$factory])
+            ->onlyMethods(['get_provider_handler_provider_and_settings_json'])
+            ->getMock();
+        $handler->method('get_provider_handler_provider_and_settings_json')->willReturn(new MockHandlerWithoutInterface());
+        $this->expectException(invalid_provider_instance_configuration::class);
+        $this->expectExceptionMessage('Tool conversation provider binding has changed');
+        $handler->complete_tools(new entity(), [], [], 'old-binding', 1, []);
+    }
+
+    public function test_tool_transport_throws_for_provider_without_adapter_on_every_turn(): void
+    {
+        global $CFG;
+
+        $factory = $this->createMock(base_factory::class);
+        $handler = $this->getMockBuilder(action_handler::class)
+            ->setConstructorArgs([$factory])
+            ->onlyMethods(['get_provider_handler_provider_and_settings_json'])
+            ->getMock();
+        $provider = new MockHandlerWithoutInterface();
+        $handler->method('get_provider_handler_provider_and_settings_json')->willReturn($provider);
+        $identity = json_encode([1, get_class($provider), []], JSON_THROW_ON_ERROR);
+        $binding = hash_hmac('sha256', $identity, $CFG->passwordsaltmain ?? '');
+        foreach ([null, $binding] as $currentbinding) {
+            try {
+                $handler->complete_tools(new entity(), [], [], $currentbinding, 1, []);
+                $this->fail('A provider without a tool adapter must throw');
+            } catch (invalid_provider_instance_configuration $e) {
+                $this->assertStringContainsString('Native tool transport is unavailable', $e->getMessage());
+            }
+        }
+    }
+
+    public function test_tool_completion_logs_once_and_does_not_continue_truncation(): void
+    {
+        $curl = $this->createMock(\curl::class);
+        $db = $this->createMock(\moodle_database::class);
+        $factory = $this->createMock(base_factory::class);
+        $factory->method('curl')->willReturn($curl);
+        $factory->method('db')->willReturn($db);
+        $factory->method('user')->willReturn((object) ['id' => 42]);
+        $config = ['base_url' => 'https://example.test', 'api_key' => 'secret', 'chat_model' => 'model'];
+        $provider = new \local_mxaimanager\app\ai\provider\providers\openai($factory, $config);
+        $handler = $this->getMockBuilder(action_handler::class)
+            ->setConstructorArgs([$factory])
+            ->onlyMethods(['get_provider_handler_provider_and_settings_json'])
+            ->getMock();
+        $handler->method('get_provider_handler_provider_and_settings_json')->willReturn($provider);
+        $curl->expects($this->once())->method('post')->willReturn(
+            '{"choices":[{"message":{"content":"partial"},"finish_reason":"length"}],'
+            . '"usage":{"prompt_tokens":12,"completion_tokens":3}}'
+        );
+        $db->expects($this->once())->method('insert_record')->with(
+            'local_mxaimanager_feature_action_usage_logs',
+            $this->callback(static function ($record) {
+                return $record['input_tokens'] === 12 && $record['output_tokens'] === 3 && $record['user_id'] === 42;
+            })
+        );
+        $this->expectException(\local_mxaimanager\app\exceptions\invalid_provider_instance_response::class);
+        $this->expectExceptionMessage('Tool completion was truncated');
+        $handler->complete_tools(new entity(), [], [], null, random_int(100000, 999999), $config);
+    }
+
+    public function test_tool_completion_binding_round_trip_and_changed_configuration(): void
+    {
+        $curl = $this->createMock(\curl::class);
+        $db = $this->createMock(\moodle_database::class);
+        $factory = $this->createMock(base_factory::class);
+        $factory->method('curl')->willReturn($curl);
+        $factory->method('db')->willReturn($db);
+        $factory->method('user')->willReturn((object) ['id' => 42]);
+        $config = ['base_url' => 'https://example.test', 'api_key' => 'secret', 'chat_model' => 'model'];
+        $provider = new \local_mxaimanager\app\ai\provider\providers\openai($factory, $config);
+        $handler = $this->getMockBuilder(action_handler::class)
+            ->setConstructorArgs([$factory])
+            ->onlyMethods(['get_provider_handler_provider_and_settings_json'])
+            ->getMock();
+        $handler->method('get_provider_handler_provider_and_settings_json')->willReturn($provider);
+        $curl->expects($this->exactly(2))->method('post')->willReturn(
+            '{"choices":[{"message":{"content":"done"},"finish_reason":"stop"}],'
+            . '"usage":{"prompt_tokens":12,"completion_tokens":3}}'
+        );
+        $db->expects($this->exactly(2))->method('insert_record');
+        $feature = new entity();
+        $providerid = random_int(100000, 999999);
+        $first = $handler->complete_tools($feature, [], [], null, $providerid, $config);
+        $this->assertSame('done', $first['text']);
+        $this->assertSame([], $first['calls']);
+        $this->assertNotEmpty($first['binding']);
+        $second = $handler->complete_tools($feature, [], [], $first['binding'], $providerid, $config);
+        $this->assertSame($first, $second);
+        $this->expectException(invalid_provider_instance_configuration::class);
+        $handler->complete_tools($feature, [], [], $first['binding'], $providerid, $config + ['other' => 'changed']);
+    }
+
     public function test_chat_completion_success(): void
     {
         // Create minimal mocks needed

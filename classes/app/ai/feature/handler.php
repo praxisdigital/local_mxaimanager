@@ -11,6 +11,8 @@ defined('MOODLE_INTERNAL') || die();
 use local_mxaimanager\app\ai\provider\message;
 use local_mxaimanager\app\ai\provider\create_transcription_request;
 use local_mxaimanager\app\ai\provider\transcription;
+use local_mxaimanager\app\ai\provider\tool_chat_request;
+use local_mxaimanager\app\ai\provider\tool_chat_turn;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_configuration;
 use local_mxaimanager\app\exceptions\invalid_provider_instance_response;
 use local_mxaimanager\app\exceptions\no_provider_instance_configured;
@@ -58,6 +60,27 @@ class handler
             $provider_id,
             $config_json
         );
+    }
+
+    /**
+     * Complete one tool-capable chat turn using the feature's configured chat provider.
+     *
+     * Tool definitions use {name, description, parameters}. Assistant tool_calls and
+     * returned calls use {id, name, arguments}; tool messages include tool_call_id and name.
+     * The binding must be supplied on subsequent turns of the same tool conversation.
+     *
+     * @return tool_chat_turn
+     */
+    public function complete(tool_chat_request $request): tool_chat_turn
+    {
+        [$provider_id, $config_json] = $this->provider_resolver->get_provider_and_config(
+            \local_mxaimanager\app\ai\provider\providers\interfaces\chat_completion::class
+        );
+
+        $result = $this->action_handler->complete_tools(
+            $this->feature, $request->messages, $request->tools, $request->binding, $provider_id, $config_json
+        );
+        return new tool_chat_turn(...$result);
     }
 
     /**

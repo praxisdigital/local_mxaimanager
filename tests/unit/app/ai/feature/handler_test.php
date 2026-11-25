@@ -17,9 +17,37 @@ use local_mxaimanager\app\ai\feature\entity;
 use local_mxaimanager\app\ai\feature\handler;
 use local_mxaimanager\app\ai\feature\provider_resolver;
 use local_mxaimanager\app\ai\feature\action_handler;
+use local_mxaimanager\app\ai\provider\tool_chat_request;
+use local_mxaimanager\app\ai\provider\tool_chat_turn;
 
 class handler_test extends base_testcase
 {
+    public function test_complete_tools_uses_chat_configuration_and_passes_binding(): void
+    {
+        $resolver = $this->createMock(provider_resolver::class);
+        $resolver->expects($this->once())->method('get_provider_and_config')
+            ->with(\local_mxaimanager\app\ai\provider\providers\interfaces\chat_completion::class)
+            ->willReturn([7, ['chat_model' => 'example']]);
+        $actions = $this->createMock(action_handler::class);
+        $feature = new entity();
+        $messages = [['role' => 'user', 'content' => 'Hi']];
+        $tools = [['name' => 'lookup', 'description' => 'Look up', 'parameters' => ['type' => 'object']]];
+        $result = ['text' => '', 'calls' => [], 'binding' => 'bound', 'finish_reason' => 'stop',
+            'input_tokens' => 10, 'output_tokens' => 2];
+        $actions->expects($this->once())->method('complete_tools')
+            ->with($feature, $messages, $tools, 'bound', 7, ['chat_model' => 'example'])->willReturn($result);
+        $base = $this->createMock(base_factory::class);
+        $ai = $this->createMock(ai_factory::class);
+        $featurefactory = $this->createMock(feature_factory::class);
+        $base->method('ai')->willReturn($ai);
+        $ai->method('feature')->willReturn($featurefactory);
+        $featurefactory->method('provider_resolver')->willReturn($resolver);
+        $featurefactory->method('action_handler')->willReturn($actions);
+        $turn = (new handler($base, $feature))->complete(new tool_chat_request($messages, $tools, 'bound'));
+        $this->assertInstanceOf(tool_chat_turn::class, $turn);
+        $this->assertSame($result, get_object_vars($turn));
+    }
+
     public function test_chat_completion(): void
     {
         // Set up mocks
