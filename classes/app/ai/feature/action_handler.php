@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 // @codeCoverageIgnoreEnd
 
 use local_mxaimanager\app\ai\provider\message;
+use local_mxaimanager\app\ai\provider\tool_completion_request;
 use local_mxaimanager\app\ai\provider\providers\interfaces\chat_completion;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_audio;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_embedding;
@@ -137,8 +138,8 @@ class action_handler
         }
         $request = $adapter->complete($messages, $tools);
         $this->log_usage($feature, $request);
-        if (in_array($request->get_finish_reason(), ['length', 'max_tokens', 'content_filter'], true)) {
-            throw new invalid_provider_instance_response('Tool completion was truncated');
+        if (tool_completion_request::has_failed_finish_reason($request->get_finish_reason())) {
+            throw new invalid_provider_instance_response('Tool completion was truncated or failed');
         }
         return ['text' => $request->get_response(), 'calls' => $request->get_calls(), 'binding' => $current_binding,
             'finish_reason' => $request->get_finish_reason(), 'input_tokens' => $request->get_input_tokens(),

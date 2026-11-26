@@ -91,7 +91,8 @@ class action_handler_test extends base_testcase
             ->getMock();
         $handler->method('get_provider_handler_provider_and_settings_json')->willReturn($provider);
         $curl->expects($this->once())->method('post')->willReturn(
-            '{"choices":[{"message":{"content":"partial"},"finish_reason":"length"}],'
+            '{"choices":[{"message":{"content":"partial","tool_calls":[{"id":"call-1",'
+            . '"function":{"name":"lookup","arguments":"{\\"id\\":"}}]},"finish_reason":"length"}],'
             . '"usage":{"prompt_tokens":12,"completion_tokens":3}}'
         );
         $db->expects($this->once())->method('insert_record')->with(
@@ -102,6 +103,36 @@ class action_handler_test extends base_testcase
         );
         $this->expectException(\local_mxaimanager\app\exceptions\invalid_provider_instance_response::class);
         $this->expectExceptionMessage('Tool completion was truncated');
+        $handler->complete_tools(new entity(), [], [], null, random_int(100000, 999999), $config);
+    }
+
+    public function test_tool_completion_logs_and_rejects_mistral_model_length(): void
+    {
+        $curl = $this->createMock(\curl::class);
+        $db = $this->createMock(\moodle_database::class);
+        $factory = $this->createMock(base_factory::class);
+        $factory->method('curl')->willReturn($curl);
+        $factory->method('db')->willReturn($db);
+        $factory->method('user')->willReturn((object) ['id' => 42]);
+        $config = ['base_url' => 'https://example.test', 'api_key' => 'secret', 'chat_model' => 'model'];
+        $provider = new \local_mxaimanager\app\ai\provider\providers\mistral($factory, $config);
+        $handler = $this->getMockBuilder(action_handler::class)
+            ->setConstructorArgs([$factory])
+            ->onlyMethods(['get_provider_handler_provider_and_settings_json'])
+            ->getMock();
+        $handler->method('get_provider_handler_provider_and_settings_json')->willReturn($provider);
+        $curl->expects($this->once())->method('post')->willReturn(
+            '{"choices":[{"message":{"content":"partial"},"finish_reason":"model_length"}],'
+            . '"usage":{"prompt_tokens":10,"completion_tokens":4}}'
+        );
+        $db->expects($this->once())->method('insert_record')->with(
+            'local_mxaimanager_feature_action_usage_logs',
+            $this->callback(static function ($record) {
+                return $record['input_tokens'] === 10 && $record['output_tokens'] === 4 && $record['user_id'] === 42;
+            })
+        );
+        $this->expectException(\local_mxaimanager\app\exceptions\invalid_provider_instance_response::class);
+        $this->expectExceptionMessage('Tool completion was truncated or failed');
         $handler->complete_tools(new entity(), [], [], null, random_int(100000, 999999), $config);
     }
 

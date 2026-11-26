@@ -109,12 +109,21 @@ class tool_transport
             if (!is_string($content)) {
                 throw new \UnexpectedValueException('Invalid assistant content');
             }
-            // Decode arguments as JSON objects, including empty objects nested inside Ollama calls.
-            $wire = json_decode($response, false, 512, JSON_THROW_ON_ERROR);
-            $calls = $this->read_calls(($this->ollama ? $wire->message : $wire->choices[0]->message)->tool_calls ?? []);
-            $finish = $this->ollama ? ($json['done_reason'] ?? 'stop') : ($json['choices'][0]['finish_reason'] ?? 'stop');
+            $finish = $this->ollama
+                ? ($json['done_reason'] ?? 'stop')
+                : ($json['choices'][0]['finish_reason'] ?? 'stop');
             $input = $this->ollama ? ($json['prompt_eval_count'] ?? 0) : ($json['usage']['prompt_tokens'] ?? 0);
             $output = $this->ollama ? ($json['eval_count'] ?? 0) : ($json['usage']['completion_tokens'] ?? 0);
+            // Preserve usage for failed/truncated turns. Their tool arguments may be incomplete,
+            // and the action handler will log this response before rejecting its finish reason.
+            if (tool_completion_request::has_failed_finish_reason($finish)) {
+                $calls = [];
+            } else {
+                // Decode arguments as JSON objects, including empty objects nested inside Ollama calls.
+                $wire = json_decode($response, false, 512, JSON_THROW_ON_ERROR);
+                $message = $this->ollama ? $wire->message : $wire->choices[0]->message;
+                $calls = $this->read_calls($message->tool_calls ?? []);
+            }
             return new tool_completion_request($payload, $json, $content, $calls, (int) $input, (int) $output, $finish);
         } catch (unsupported_tool_completion $e) {
             throw $e;
