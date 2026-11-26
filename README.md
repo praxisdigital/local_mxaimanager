@@ -125,8 +125,9 @@ rather than switching providers. `complete` returns a `tool_chat_turn` or throws
 adapter raises `invalid_provider_instance_configuration`, and an explicit provider rejection
 of tool support raises `unsupported_tool_completion` (a subclass of
 `invalid_provider_instance_response`). Other provider errors also raise exceptions. Rejections
-are not cached. Tool turns are logged like ordinary chat calls, including responses
-rejected for truncation or provider errors; truncated responses are not continued.
+are not cached. Tool completion responses that pass transport validation are logged before their finish
+reason is checked. Truncated or failed finish reasons are rejected without continuation. Transport errors
+and responses rejected during validation do not produce a usage record.
 
 ## Providers
 
