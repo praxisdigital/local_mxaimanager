@@ -9,6 +9,7 @@ defined('MOODLE_INTERNAL') || die();
 // @codeCoverageIgnoreEnd
 
 use local_mxaimanager\app\ai\provider\message;
+use local_mxaimanager\app\ai\provider\tool_completion_request;
 use local_mxaimanager\app\ai\provider\providers\interfaces\chat_completion;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_audio;
 use local_mxaimanager\app\ai\provider\providers\interfaces\create_embedding;
@@ -109,6 +110,40 @@ class action_handler
         // Return the response, stripping any markdown code block wrapper for JSON requests.
         $response = $chat_completion_request->get_response();
         return $is_json_request ? $this->strip_markdown_json_wrapper($response) : $response;
+    }
+
+    /** Complete a single tool turn without the text-only continuation path. */
+    public function complete_tools(
+        entity $feature,
+        array $messages,
+        array $tools,
+        ?string $binding,
+        int $provider_id,
+        array $config_json
+    ): array {
+        global $CFG;
+
+        $handler = $this->get_provider_handler_provider_and_settings_json($provider_id, $config_json);
+        $identity = json_encode([$provider_id, get_class($handler), $config_json], JSON_THROW_ON_ERROR);
+        $current_binding = hash_hmac('sha256', $identity, $CFG->passwordsaltmain ?? '');
+        if ($binding !== null && !hash_equals($current_binding, $binding)) {
+            throw new invalid_provider_instance_configuration('Tool conversation provider binding has changed');
+        }
+
+        $adapter = \local_mxaimanager\app\ai\provider\tool_transport::for_provider(
+            $handler, $this->base_factory, $config_json
+        );
+        if ($adapter === null) {
+            throw new invalid_provider_instance_configuration('Native tool transport is unavailable for the configured provider');
+        }
+        $request = $adapter->complete($messages, $tools);
+        $this->log_usage($feature, $request);
+        if (tool_completion_request::has_failed_finish_reason($request->get_finish_reason())) {
+            throw new invalid_provider_instance_response('Tool completion was truncated or failed');
+        }
+        return ['text' => $request->get_response(), 'calls' => $request->get_calls(), 'binding' => $current_binding,
+            'finish_reason' => $request->get_finish_reason(), 'input_tokens' => $request->get_input_tokens(),
+            'output_tokens' => $request->get_output_tokens()];
     }
 
     /**
